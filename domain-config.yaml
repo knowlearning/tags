@@ -1,0 +1,28 @@
+postgres:
+  tables:
+    tags:
+      type: application/json;type=tag-type
+      columns:
+        name: TEXT
+        description: TEXT
+  functions: {}
+  scopes: {}
+agent: |
+  import Agent from 'npm:@knowlearning/agents/deno.js'
+
+  const activeUsers = await Agent.state('active-users')
+
+  Agent.on('child', child => {
+    const { environment: { user } } = child
+
+    activeUsers[user] = Date.now()
+
+    child.on('mutate', async mutation => {
+      const { scope, patch } = mutation
+      activeUsers[user] = Date.now()
+    })
+
+    child.on('close', info => {
+      delete activeUsers[user]
+    })
+  })
