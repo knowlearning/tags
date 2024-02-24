@@ -5,13 +5,60 @@
   const selectedTags = ref({})
   const fetchingTags = ref(false)
   const activeUsers = ref({})
+  const activeUserTags = ref({})
+  const myTags = ref(null)
+
+  if (!Set.prototype.difference) {
+    Set.prototype.difference = function(otherSet) {
+        if (!(otherSet instanceof Set)) {
+            throw new TypeError('Provided argument must be a Set');
+        }
+
+        const differenceSet = new Set();
+
+        for (const element of this) {
+            if (!otherSet.has(element)) {
+                differenceSet.add(element);
+            }
+        }
+
+        return differenceSet;
+    }
+  }
+
+  Agent.state('tags').then(state => myTags.value = state)
+  
+
+  function addedKeys(o1, o2) {
+    const s1 = new Set(Object.keys(o1))
+    const s2 = new Set(Object.keys(o2))
+    return s2.difference(s1)
+  }
+
+  function removedKeys(o1, o2) {
+    const s1 = new Set(Object.keys(o1))
+    const s2 = new Set(Object.keys(o2))
+    return s1.difference(s2)
+  }
 
   Agent
     .watch(
       'active-users',
       ({ state }) => {
+        const removedUsers = removedKeys(activeUsers.value, state)
+        const addedUsers = addedKeys(activeUsers.value, state)
+
+        addedUsers.forEach(user => {
+          activeUserTags.value[user] = {}
+          Agent
+            .watch(
+              'tags',
+              ({ state }) => activeUserTags.value[user] = state,
+              user
+            )
+        })
+
         activeUsers.value = state
-        console.log(state)
       },
       window.location.host
     )
@@ -27,10 +74,14 @@
   async function create() {
     const name = tagSearch.value.trim()
     if (!name) alert('Please enter name')
-    Agent.create({
-      active_type: 'application/json;type=tag-type',
-      active: { name, description: '' }
+
+    const id = await Agent.create({
+      active_type: 'application/json;type=tag',
+      active: { name, description: 'A new tag' }
     })
+
+    myTags.value[id] = {}
+
     await Agent.synced()
     fetchTags()
   }
@@ -44,28 +95,14 @@
 
 <template>
   <div id="main-page">
-    {{ activeUsers }}
     <div id="available-tags">
       <div>
         <input v-model="tagSearch" placeholder="search" />
         <button @click="search">search</button>
         <button @click="create">create</button>
       </div>
-      <div
-        v-for="{ id, name, description } in tags"
-        :key="id"
-      >
-        <h2>
-          <input
-            type="checkbox"
-            v-model="selectedTags[id]"
-            :id="id"
-          />
-          <label :for="id">{{ name }}</label>
-        </h2>
-        <p>{{ description }}</p> 
-        <button @click="archive(id)">Archive</button>
-      </div>
+      <pre>{{ activeUsers }}</pre>
+      <pre>{{ activeUserTags }}</pre>
     </div>
     <div id="matching-content">
       {{ selectedTags }}
