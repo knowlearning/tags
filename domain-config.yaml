@@ -1,15 +1,25 @@
 postgres:
   tables:
-    tags:
+    tag_types:
       type: application/json;type=tag-type
       columns:
         name: TEXT
         description: TEXT
+    taggings:
+      type: application/json;type=tagging
+      columns:
+        tag_id: TEXT
+        content_id: TEXT
+        active: BOOLEAN
   functions: {}
-  scopes: {}
+  scopes:
+    tags: SELECT * FROM tag_types
+    taggings: SELECT * FROM taggings WHERE active IS TRUE
 agent: |
   import Agent from 'npm:@knowlearning/agents/deno.js'
   import * as uuid from "https://deno.land/std@0.207.0/uuid/mod.ts";
+
+  const TAGGING_TYPE = 'application/json;type=tagging'
 
   const activeUsers = await Agent.state('active-users')
 
@@ -23,6 +33,21 @@ agent: |
     child.on('mutate', async mutation => {
       const { scope, patch } = mutation
       activeUsers[user] = Date.now()
+
+      if (scope === 'tags') {
+        patch.forEach(async ({ path, value }) => {
+          if (path.length === 2) {
+            const [ tagId, contentId ] = path
+            const taggingId = `tagging/${tagId}/${contentId}`
+            const tagging = await Agent.state(taggingId)
+            const metadata = await Agent.metadata(taggingId)
+            if (metadata.active_type !== TAGGING_TYPE) {
+              metadata.active_type = TAGGING_TYPE
+            }
+            tagging.active = !!value
+          }
+        })
+      }
     })
 
     child.on('close', info => {

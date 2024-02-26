@@ -1,6 +1,8 @@
 <script setup>
   import { ref } from 'vue'
-  const tags = ref([])
+  import vueScopeComponent from '@knowlearning/agents/vue/3/components/scope.vue'
+
+  const allTags = ref([])
   const tagSearch = ref('')
   const selectedTags = ref({})
   const fetchingTags = ref(false)
@@ -27,7 +29,6 @@
   }
 
   Agent.state('tags').then(state => myTags.value = state)
-  
 
   function addedKeys(o1, o2) {
     const s1 = new Set(Object.keys(o1))
@@ -63,11 +64,11 @@
       window.location.host
     )
 
-  fetchTags()
+  fetchAllTags()
 
-  function fetchTags() {
+  async function fetchAllTags() {
     fetchingTags.value = true
-    tags.value = []
+    allTags.value = await Agent.query('tags')
     fetchingTags.value = false
   }
 
@@ -83,7 +84,7 @@
     myTags.value[id] = {}
 
     await Agent.synced()
-    fetchTags()
+    fetchAllTags()
   }
 
   async function archive(id) {
@@ -101,10 +102,28 @@
         <button @click="search">search</button>
         <button @click="create">create</button>
       </div>
-      <pre>{{ activeUsers }}</pre>
-      <pre>{{ activeUserTags }}</pre>
+      <div
+        v-for="{ id } in allTags"
+        @click="selectedTags[id] ? delete selectedTags[id] : selectedTags[id] = true"
+        :class="{
+          tag: true,
+          selected: !!selectedTags[id]
+        }"
+      >
+        <vueScopeComponent :id="id" :path="['name']" />
+        <input
+          @keypress.enter="event => {
+            if (!myTags[id]) myTags[id] = {}
+            myTags[id][event.target.value] = true
+            event.target.value = ''
+          }" />
+      </div>
     </div>
     <div id="matching-content">
+      <div>
+        <pre>{{ activeUsers }}</pre>
+        <pre>{{ activeUserTags }}</pre>
+      </div>
       {{ selectedTags }}
     </div>
   </div>
@@ -132,6 +151,16 @@
   #matching-content
   {
     flex-grow: 1;
+  }
+
+  .tag
+  {
+    cursor: pointer;
+  }
+
+  .tag.selected
+  {
+    background: chartreuse;
   }
 
 </style>
