@@ -44,6 +44,8 @@ agent: |
             if (metadata.active_type !== TAGGING_TYPE) {
               metadata.active_type = TAGGING_TYPE
             }
+            tagging.tag_id = tagId
+            tagging.content_id = contentId
             tagging.active = !!value
           }
         })
