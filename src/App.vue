@@ -97,6 +97,12 @@
 <template>
   <div id="main-page">
     <div id="available-tags">
+      <div
+        v-for="v, id in selectedTags"
+        @click="delete selectedTags[id]"
+      >
+        <vueScopeComponent :id="id" :path="['name']" />
+      </div>
       <div>
         <input v-model="tagSearch" placeholder="search" />
         <button @click="search">search</button>
@@ -124,7 +130,6 @@
         <pre>{{ activeUsers }}</pre>
         <pre>{{ activeUserTags }}</pre>
       </div>
-      {{ selectedTags }}
     </div>
   </div>
 </template>
