@@ -17,8 +17,8 @@ postgres:
     search: |
       SELECT *
       FROM tag_types
-      WHERE to_tsvector('english', name) @@ to_tsquery('english', $1)
-         OR to_tsvector('english', description) @@ to_tsquery('english', $1)
+      WHERE to_tsvector('english', name) @@ plainto_tsquery('english', $1)
+         OR to_tsvector('english', description) @@ plainto_tsquery('english', $1)
     taggings: SELECT * FROM taggings WHERE active IS TRUE
 agent: |
   import Agent from 'npm:@knowlearning/agents/deno.js'
