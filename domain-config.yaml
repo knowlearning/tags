@@ -14,6 +14,15 @@ postgres:
   functions: {}
   scopes:
     tags: SELECT * FROM tag_types
+    my-tags: |
+      SELECT
+        metadata.id as id,
+        tag_types.name as name,
+        description
+      FROM tag_types
+      LEFT JOIN metadata
+        ON metadata.id = tag_types.id
+      WHERE metadata.owner = $REQUESTER
     search: |
       SELECT *
       FROM tag_types

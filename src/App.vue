@@ -68,7 +68,12 @@
 
   async function searchTags(query) {
     fetchingTags.value = true
-    matchingTags.value = await Agent.query('search', [query])
+    if (query === '') {
+      matchingTags.value = await Agent.query('my-tags')
+    }
+    else {
+      matchingTags.value = await Agent.query('search', [query])
+    }
     fetchingTags.value = false
   }
 
