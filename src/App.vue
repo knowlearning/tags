@@ -77,7 +77,7 @@
     if (!name) alert('Please enter name')
 
     const id = await Agent.create({
-      active_type: 'application/json;type=tag',
+      active_type: 'application/json;type=tag-type',
       active: { name, description: 'A new tag' }
     })
 
