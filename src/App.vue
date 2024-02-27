@@ -2,7 +2,7 @@
   import { ref } from 'vue'
   import vueScopeComponent from '@knowlearning/agents/vue/3/components/scope.vue'
 
-  const allTags = ref([])
+  const matchingTags = ref([])
   const tagSearch = ref('')
   const selectedTags = ref({})
   const fetchingTags = ref(false)
@@ -64,11 +64,11 @@
       window.location.host
     )
 
-  fetchAllTags()
+  searchTags('')
 
-  async function fetchAllTags() {
+  async function searchTags(query) {
     fetchingTags.value = true
-    allTags.value = await Agent.query('tags')
+    matchingTags.value = await Agent.query('search', [query])
     fetchingTags.value = false
   }
 
@@ -82,9 +82,6 @@
     })
 
     myTags.value[id] = {}
-
-    await Agent.synced()
-    fetchAllTags()
   }
 
   async function archive(id) {
@@ -105,11 +102,11 @@
       </div>
       <div>
         <input v-model="tagSearch" placeholder="search" />
-        <button @click="search">search</button>
+        <button @click="searchTags(tagSearch)">search</button>
         <button @click="create">create</button>
       </div>
       <div
-        v-for="{ id } in allTags"
+        v-for="{ id } in matchingTags"
         @click="selectedTags[id] ? delete selectedTags[id] : selectedTags[id] = true"
         :class="{
           tag: true,
