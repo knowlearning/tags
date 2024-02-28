@@ -1,6 +1,7 @@
 <script setup>
   import { ref } from 'vue'
   import vueScopeComponent from '@knowlearning/agents/vue/3/components/scope.vue'
+  import TagEditor from './tag-editor.vue'
 
   const matchingTags = ref([])
   const tagSearch = ref('')
@@ -9,6 +10,7 @@
   const activeUsers = ref({})
   const activeUserTags = ref({})
   const myTags = ref(null)
+  const viewTag = ref(null)
 
   if (!Set.prototype.difference) {
     Set.prototype.difference = function(otherSet) {
@@ -86,6 +88,8 @@
       active: { name, description: 'A new tag' }
     })
 
+    viewTag.value = id
+
     myTags.value[id] = {}
   }
 
@@ -106,7 +110,11 @@
         <vueScopeComponent :id="id" :path="['name']" />
       </div>
       <div>
-        <input v-model="tagSearch" placeholder="search" />
+        <input
+          v-model="tagSearch"
+          placeholder="search"
+          @keypress.enter="searchTags(tagSearch)"
+        />
         <button @click="searchTags(tagSearch)">search</button>
         <button @click="create">create</button>
       </div>
@@ -120,14 +128,31 @@
       >
         <vueScopeComponent :id="id" :path="['name']" />
         <input
+          @click.stop
           @keypress.enter="event => {
             if (!myTags[id]) myTags[id] = {}
             myTags[id][event.target.value] = true
             event.target.value = ''
-          }" />
+          }"
+        />
+        <button
+          @click.stop="viewTag = id"
+        >
+          view
+        </button>
       </div>
     </div>
-    <div id="matching-content">
+    <div
+      v-if="viewTag"
+      :key="viewTag"
+      id="edit-tag-wrapper"
+    >
+      <TagEditor :id="viewTag" />
+    </div>
+    <div
+      v-else
+      id="matching-content"
+    >
       <div>
         <pre>{{ activeUsers }}</pre>
         <pre>{{ activeUserTags }}</pre>
