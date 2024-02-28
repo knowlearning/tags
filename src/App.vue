@@ -1,7 +1,7 @@
 <script setup>
   import { ref, watch } from 'vue'
   import vueScopeComponent from '@knowlearning/agents/vue/3/components/scope.vue'
-  import TagEditor from './tag-editor.vue'
+  import TagViewer from './tag-viewer.vue'
 
   const matchingTags = ref([])
   const tagSearch = ref('')
@@ -127,7 +127,7 @@
         <button @click="searchTags(tagSearch)">search</button>
         <button @click="create">create</button>
         <input type="checkbox" v-model="showArchived" id="show-archived" >
-        <label for="show-archived">archived</label>
+        <label for="show-archived">show archived</label>
       </div>
       <div
         v-for="{ id } in matchingTags"
@@ -158,7 +158,7 @@
       :key="viewTag"
       id="edit-tag-wrapper"
     >
-      <TagEditor :id="viewTag" />
+      <TagViewer :id="viewTag" />
     </div>
     <div
       v-else
