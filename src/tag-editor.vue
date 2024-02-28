@@ -24,6 +24,14 @@
       <input v-model="tagType.name" />
       <textarea v-model="tagType.description"></textarea>
       <button @click="editing = false">save</button>
+      <button
+        v-if="tagType.archived"
+        @click="delete tagType.archived"
+      >unarchive</button>
+      <button
+        v-else
+        @click="tagType.archived = true"
+      >archive</button>
     </div>
     <div v-else>
       <h1>

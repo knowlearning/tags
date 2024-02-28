@@ -1,5 +1,5 @@
 <script setup>
-  import { ref } from 'vue'
+  import { ref, watch } from 'vue'
   import vueScopeComponent from '@knowlearning/agents/vue/3/components/scope.vue'
   import TagEditor from './tag-editor.vue'
 
@@ -11,6 +11,7 @@
   const activeUserTags = ref({})
   const myTags = ref(null)
   const viewTag = ref(null)
+  const showArchived = ref(false)
 
   if (!Set.prototype.difference) {
     Set.prototype.difference = function(otherSet) {
@@ -68,10 +69,18 @@
 
   searchTags('')
 
+  watch(showArchived, () => searchTags(''))
+
+
   async function searchTags(query) {
     fetchingTags.value = true
     if (query === '') {
-      matchingTags.value = await Agent.query('my-tags')
+      if (showArchived.value) {
+        matchingTags.value = await Agent.query('my-archived-tags')
+      }
+      else {
+        matchingTags.value = await Agent.query('my-tags')
+      }
     }
     else {
       matchingTags.value = await Agent.query('search', [query])
@@ -117,6 +126,8 @@
         />
         <button @click="searchTags(tagSearch)">search</button>
         <button @click="create">create</button>
+        <input type="checkbox" v-model="showArchived" id="show-archived" >
+        <label for="show-archived">archived</label>
       </div>
       <div
         v-for="{ id } in matchingTags"

@@ -5,6 +5,7 @@ postgres:
       columns:
         name: TEXT
         description: TEXT
+        archived: BOOLEAN
     taggings:
       type: application/json;type=tagging
       columns:
@@ -23,6 +24,17 @@ postgres:
       LEFT JOIN metadata
         ON metadata.id = tag_types.id
       WHERE metadata.owner = $REQUESTER
+        AND archived IS NOT true
+    my-archived-tags: |
+      SELECT
+        metadata.id as id,
+        tag_types.name as name,
+        description
+      FROM tag_types
+      LEFT JOIN metadata
+        ON metadata.id = tag_types.id
+      WHERE metadata.owner = $REQUESTER
+        AND archived IS TRUE
     search: |
       SELECT *
       FROM tag_types
