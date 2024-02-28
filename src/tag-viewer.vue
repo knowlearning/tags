@@ -1,5 +1,6 @@
 <script setup>
   import { ref, computed } from 'vue'
+  import tagMatches from './tag-matches.vue'
 
   const { id } = defineProps({
     id: String
@@ -42,6 +43,7 @@
         >Edit</button>
       </h1>
       <p>{{ tagType.description }}</p>
+      <tagMatches :id="id" />
     </div>
   </div>
   <div v-else>loading...</div>

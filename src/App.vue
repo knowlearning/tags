@@ -9,7 +9,6 @@
   const fetchingTags = ref(false)
   const activeUsers = ref({})
   const activeUserTags = ref({})
-  const myTags = ref(null)
   const viewTag = ref(null)
   const showArchived = ref(false)
 
@@ -30,8 +29,6 @@
         return differenceSet;
     }
   }
-
-  Agent.state('tags').then(state => myTags.value = state)
 
   function addedKeys(o1, o2) {
     const s1 = new Set(Object.keys(o1))
@@ -98,14 +95,6 @@
     })
 
     viewTag.value = id
-
-    myTags.value[id] = {}
-  }
-
-  async function archive(id) {
-    console.log('tag type', id)
-    const tagType = await Agent.state(id)
-    tagType.archived = true
   }
 </script>
 
@@ -138,17 +127,7 @@
         }"
       >
         <vueScopeComponent :id="id" :path="['name']" />
-        <input
-          @click.stop
-          @keypress.enter="event => {
-            if (!myTags[id]) myTags[id] = {}
-            myTags[id][event.target.value] = true
-            event.target.value = ''
-          }"
-        />
-        <button
-          @click.stop="viewTag = id"
-        >
+        <button @click.stop="viewTag = id">
           view
         </button>
       </div>
