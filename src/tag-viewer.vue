@@ -10,7 +10,9 @@
   const tagTypeMetadata = ref(null)
   const environment = ref(null)
   const editing = ref(false)
+  const myTags = ref(null)
 
+  Agent.state('tags').then(state => myTags.value = state)
   Agent.state(id).then(state => tagType.value = state)
   Agent.metadata(id).then(md => tagTypeMetadata.value = md)
   Agent.environment().then(env => environment.value = env)
@@ -43,7 +45,16 @@
         >Edit</button>
       </h1>
       <p>{{ tagType.description }}</p>
-      <tagMatches :id="id" />
+
+      <input
+        placeholder="Add tag"
+        @keypress.enter="event => {
+          if (!myTags[id]) myTags[id] = {}
+          myTags[id][event.target.value] = true
+          event.target.value = ''
+        }"
+      />
+      <tagMatches :ids="[id]" />
     </div>
   </div>
   <div v-else>loading...</div>
