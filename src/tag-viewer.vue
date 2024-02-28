@@ -43,6 +43,7 @@
           :disabled="!userIsOwner"
           @click="editing = true"
         >Edit</button>
+        <button @click="$emit('close')">Close</button>
       </h1>
       <p>{{ tagType.description }}</p>
 

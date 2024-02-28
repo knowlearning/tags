@@ -2,13 +2,12 @@
   import { ref, watch } from 'vue'
   import vueScopeComponent from '@knowlearning/agents/vue/3/components/scope.vue'
   import TagViewer from './tag-viewer.vue'
+  import TagMatches from './tag-matches.vue'
 
   const matchingTags = ref([])
   const tagSearch = ref('')
   const selectedTags = ref({})
   const fetchingTags = ref(false)
-  const activeUsers = ref({})
-  const activeUserTags = ref({})
   const viewTag = ref(null)
   const showArchived = ref(false)
 
@@ -41,28 +40,6 @@
     const s2 = new Set(Object.keys(o2))
     return s1.difference(s2)
   }
-
-  Agent
-    .watch(
-      'active-users',
-      ({ state }) => {
-        const removedUsers = removedKeys(activeUsers.value, state)
-        const addedUsers = addedKeys(activeUsers.value, state)
-
-        addedUsers.forEach(user => {
-          activeUserTags.value[user] = {}
-          Agent
-            .watch(
-              'tags',
-              ({ state }) => activeUserTags.value[user] = state,
-              user
-            )
-        })
-
-        activeUsers.value = state
-      },
-      window.location.host
-    )
 
   searchTags('')
 
@@ -137,16 +114,19 @@
       :key="viewTag"
       id="edit-tag-wrapper"
     >
-      <TagViewer :id="viewTag" />
+      <TagViewer
+        :id="viewTag"
+        @close="viewTag = null"
+      />
     </div>
     <div
       v-else
       id="matching-content"
     >
-      <div>
-        <pre>{{ activeUsers }}</pre>
-        <pre>{{ activeUserTags }}</pre>
-      </div>
+      <TagMatches
+        :key="Object.keys(selectedTags).join(',')"
+        :ids="Object.keys(selectedTags)"
+      />
     </div>
   </div>
 </template>

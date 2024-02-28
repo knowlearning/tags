@@ -1,7 +1,7 @@
 <script setup>
   import { ref, watch } from 'vue'
 
-  const { ids } = defineProps({ ids: String })
+  const { ids } = defineProps({ ids: Array })
 
   const matches = ref([])
   const fetching = ref(false)
