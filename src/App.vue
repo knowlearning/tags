@@ -78,11 +78,9 @@
 <template>
   <div id="main-page">
     <div id="available-tags">
-      <div
-        v-for="v, id in selectedTags"
-        @click="delete selectedTags[id]"
-      >
+      <div v-for="v, id in selectedTags">
         <vueScopeComponent :id="id" :path="['name']" />
+        <button @click="delete selectedTags[id]">X</button>
       </div>
       <div>
         <input
