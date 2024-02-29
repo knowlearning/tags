@@ -1,5 +1,6 @@
 <script setup>
   import { ref, watch } from 'vue'
+  import TagMatch from './tag-match.vue'
 
   const { ids } = defineProps({ ids: Array })
 
@@ -21,12 +22,14 @@
     <thead>
       <tr>
         <th>Content</th>
+        <th>Tags</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="{ content_id, } in matches">
-        <td>{{ content_id }}</td>
-      </tr>
+      <TagMatch
+        v-for="{ content_id, } in matches"
+        :id="content_id"
+      />
     </tbody>
   </table>
 </template>

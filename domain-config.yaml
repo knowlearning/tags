@@ -40,13 +40,18 @@ postgres:
       FROM tag_types
       WHERE to_tsvector('english', name) @@ plainto_tsquery('english', $1)
          OR to_tsvector('english', description) @@ plainto_tsquery('english', $1)
-    taggings:
+    taggings: |
       SELECT content_id
       FROM taggings
       WHERE tag_id = ANY($1)
+        AND active IS TRUE
       GROUP BY content_id
       HAVING COUNT(DISTINCT tag_id) = ARRAY_LENGTH($1, 1)
-
+    tags-for-content: |
+      SELECT DISTINCT tag_id
+      FROM taggings
+      WHERE content_id = $1
+        AND active IS TRUE
 agent: |
   import Agent from 'npm:@knowlearning/agents/deno.js'
   import * as uuid from "https://deno.land/std@0.207.0/uuid/mod.ts";
@@ -54,6 +59,17 @@ agent: |
   const TAGGING_TYPE = 'application/json;type=tagging'
 
   const activeUsers = await Agent.state('active-users')
+
+  const logScope = await Agent.state('log')
+
+  if (!logScope.recent) logScope.recent = []
+
+  function log() {
+    logScope.recent.push(...arguments)
+    while (logScope.recent.length > 100) {
+      logScope.recent.shift()
+    }
+  }
 
   Agent.on('child', child => {
     const { environment: { user } } = child
@@ -67,6 +83,7 @@ agent: |
       activeUsers[user] = Date.now()
 
       if (scope === 'tags') {
+        log('TAG PATCH', patch)
         patch.forEach(async ({ path, value }) => {
           if (path.length === 2) {
             const [ tagId, contentId ] = path
