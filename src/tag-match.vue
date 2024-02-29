@@ -24,6 +24,9 @@
   <tr>
     <td>{{ id }}</td>
     <td>
+      <vueScopeComponent :id="id" metadata :path="['owner']" />
+    </td>
+    <td>
       <span
         v-for="{ tag_id } in matches"
         class="match"

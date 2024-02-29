@@ -22,6 +22,7 @@
     <thead>
       <tr>
         <th>Content</th>
+        <th>Owner</th>
         <th>Tags</th>
       </tr>
     </thead>
