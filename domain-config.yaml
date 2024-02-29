@@ -66,8 +66,8 @@ agent: |
 
   function log() {
     logScope.recent.push(...arguments)
-    while (logScope.recent.length > 100) {
-      logScope.recent.shift()
+    if (logScope.recent.length > 200) {
+      logScope.recent = JSON.parse(JSON.stringify(logScope.recent.slice(100)))
     }
   }
 

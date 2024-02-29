@@ -29,8 +29,8 @@
         class="match"
         @click="() => {
           if (!myTags[tag_id]) myTags[tag_id] = {}
-          console.log('CLICKED!!!!', myTags)
           myTags[tag_id][id] = false
+          update()
         }"
       >
         <vueScopeComponent :id="tag_id" :path="['name']" />
