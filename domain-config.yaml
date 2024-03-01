@@ -112,23 +112,23 @@ agent: |
       activeUsers[user] = Date.now()
 
       if (scope === 'tags') {
-        Agent.log(('TAG PATCH', patch)
+        Agent.log('TAG PATCH', patch)
         patch.forEach(async ({ path, value }) => {
           if (path.length === 2) {
             const [ tagId, contentId ] = path
             const taggingId = `tagging/${tagId}/${contentId}`
-            Agent.log(('IN UPDATE LOGIC')
+            Agent.log('IN UPDATE LOGIC')
             const tagging = await Agent.state(taggingId)
-            Agent.log(('GOT STATE', JSON.parse(JSON.stringify(tagging)))
+            Agent.log('GOT STATE', JSON.parse(JSON.stringify(tagging)))
             const metadata = await Agent.metadata(taggingId)
-            Agent.log(('GOT METADATA', JSON.parse(JSON.stringify(metadata)))
+            Agent.log('GOT METADATA', JSON.parse(JSON.stringify(metadata)))
             if (metadata.active_type !== TAGGING_TYPE) {
               metadata.active_type = TAGGING_TYPE
             }
             tagging.tag_id = tagId
             tagging.content_id = contentId
             tagging.active = !!value
-            Agent.log(('ADJUSTED VALUE', !!value)
+            Agent.log('ADJUSTED VALUE', !!value)
           }
         })
       }
