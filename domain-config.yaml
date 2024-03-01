@@ -92,6 +92,18 @@ postgres:
         FROM tag_types
         WHERE to_tsvector('english', name) @@ plainto_tsquery('english', $1)
            OR to_tsvector('english', description) @@ plainto_tsquery('english', $1)
+    taggings: |
+      SELECT content_id
+      FROM taggings
+      WHERE tag_id = ANY($1)
+        AND active IS TRUE
+      GROUP BY content_id
+      HAVING COUNT(DISTINCT tag_id) = ARRAY_LENGTH($1, 1)
+    tags-for-content: |
+      SELECT DISTINCT tag_id
+      FROM taggings
+      WHERE content_id = $1
+        AND active IS TRUE
 agent: |
   import Agent from 'npm:@knowlearning/agents/deno.js'
   import * as uuid from "https://deno.land/std@0.207.0/uuid/mod.ts";
