@@ -1,3 +1,8 @@
+authorize:
+  sameDomain:
+    postgres: same_domain_authorization
+  crossDomain:
+    postgres: cross_domain_authorization
 postgres:
   tables:
     tag_types:
@@ -12,7 +17,33 @@ postgres:
         tag_id: TEXT
         content_id: TEXT
         active: BOOLEAN
-  functions: {}
+  functions:
+    same_domain_authorization:
+      returns: BOOLEAN
+      language: PLpgSQL
+      body: |
+        BEGIN
+          RETURN TRUE;
+        END;
+      arguments:
+      - name: requestingUser
+        type: TEXT
+      - name: requestedScope
+        type: TEXT
+    cross_domain_authorization:
+      returns: BOOLEAN
+      language: PLpgSQL
+      body: |
+        BEGIN
+          RETURN TRUE;
+        END;
+      arguments:
+      - name: requestingDomain
+        type: TEXT
+      - name: requestingUser
+        type: TEXT
+      - name: requestedScope
+        type: TEXT
   scopes:
     tags: SELECT * FROM tag_types
     my-tags: |
@@ -52,6 +83,15 @@ postgres:
       FROM taggings
       WHERE content_id = $1
         AND active IS TRUE
+  crossDomainQueries:
+    search-tags:
+      domains:
+      - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
+      body: |
+        SELECT *
+        FROM tag_types
+        WHERE to_tsvector('english', name) @@ plainto_tsquery('english', $1)
+           OR to_tsvector('english', description) @@ plainto_tsquery('english', $1)
 agent: |
   import Agent from 'npm:@knowlearning/agents/deno.js'
   import * as uuid from "https://deno.land/std@0.207.0/uuid/mod.ts";
@@ -59,17 +99,6 @@ agent: |
   const TAGGING_TYPE = 'application/json;type=tagging'
 
   const activeUsers = await Agent.state('active-users')
-
-  const logScope = await Agent.state('log')
-
-  if (!logScope.recent) logScope.recent = []
-
-  function log() {
-    logScope.recent.push(...arguments)
-    if (logScope.recent.length > 200) {
-      logScope.recent = JSON.parse(JSON.stringify(logScope.recent.slice(100)))
-    }
-  }
 
   Agent.on('child', child => {
     const { environment: { user } } = child
@@ -83,23 +112,23 @@ agent: |
       activeUsers[user] = Date.now()
 
       if (scope === 'tags') {
-        log('TAG PATCH', patch)
+        Agent.log(('TAG PATCH', patch)
         patch.forEach(async ({ path, value }) => {
           if (path.length === 2) {
             const [ tagId, contentId ] = path
             const taggingId = `tagging/${tagId}/${contentId}`
-            log('IN UPDATE LOGIC')
+            Agent.log(('IN UPDATE LOGIC')
             const tagging = await Agent.state(taggingId)
-            log('GOT STATE', JSON.parse(JSON.stringify(tagging)))
+            Agent.log(('GOT STATE', JSON.parse(JSON.stringify(tagging)))
             const metadata = await Agent.metadata(taggingId)
-            log('GOT METADATA', JSON.parse(JSON.stringify(metadata)))
+            Agent.log(('GOT METADATA', JSON.parse(JSON.stringify(metadata)))
             if (metadata.active_type !== TAGGING_TYPE) {
               metadata.active_type = TAGGING_TYPE
             }
             tagging.tag_id = tagId
             tagging.content_id = contentId
             tagging.active = !!value
-            log('ADJUSTED VALUE', !!value)
+            Agent.log(('ADJUSTED VALUE', !!value)
           }
         })
       }
