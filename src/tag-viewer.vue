@@ -19,6 +19,11 @@
 
   const userIsOwner = computed(() => environment.value.auth.user === tagTypeMetadata.value.owner)
 
+  function addTag(tagId, contentId) {
+    if (!myTags.value[tagId]) myTags.value[tagId] = {}
+    myTags.value[tagId][contentId] = true
+  }
+
 </script>
 
 <template>
@@ -50,8 +55,8 @@
       <input
         placeholder="Add tag"
         @keypress.enter="event => {
-          if (!myTags[id]) myTags[id] = {}
-          myTags[id][event.target.value] = true
+          const contentId = event.target.value
+          addTag(id, contentId)
           event.target.value = ''
         }"
       />

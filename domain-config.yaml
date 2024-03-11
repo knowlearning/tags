@@ -121,8 +121,6 @@ agent: |
   Agent.on('child', child => {
     const { environment: { user } } = child
 
-    if (!uuid.validate(user)) return
-
     activeUsers[user] = Date.now()
 
     child.on('mutate', async mutation => {
