@@ -109,6 +109,8 @@ postgres:
     tags-for-content:
       domains:
       - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
+      - thailand.pilaproject.org
+      - app.pilaproject.org
       body: |
         SELECT DISTINCT tag_id
         FROM taggings
