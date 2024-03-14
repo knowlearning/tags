@@ -50,6 +50,7 @@
         >Edit</button>
         <button @click="$emit('close')">Close</button>
       </h1>
+      <p>tag id:{{ id }}</p>
       <p>{{ tagType.description }}</p>
 
       <input
