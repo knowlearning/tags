@@ -80,10 +80,6 @@
 
     viewTag.value = id
   }
-
-  function validateItems(items) {
-   items.forEach()
-  }
 </script>
 
 <template>
@@ -103,6 +99,8 @@
         <v-chip
           :key="data.item.value"
           v-bind="data.attrs"
+          :color="viewTag === data.item.value ? 'primary' : ''"
+          :variant="viewTag === data.item.value ? 'flat' : 'tonal'"
           :disabled="data.disabled"
           :model-value="data.selected"
           @click="selectTag(data.item.value)"
