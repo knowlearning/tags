@@ -32,18 +32,6 @@
     }
   }
 
-  function addedKeys(o1, o2) {
-    const s1 = new Set(Object.keys(o1))
-    const s2 = new Set(Object.keys(o2))
-    return s2.difference(s1)
-  }
-
-  function removedKeys(o1, o2) {
-    const s1 = new Set(Object.keys(o1))
-    const s2 = new Set(Object.keys(o2))
-    return s1.difference(s2)
-  }
-
   searchTags('')
 
   watch(tagSearch, () => searchTags(tagSearch.value))
@@ -55,6 +43,21 @@
     }
   })
 
+  function selectTag(id) {
+    viewTag.value = viewTag.value === id ? null : id
+  }
+
+  function addedKeys(o1, o2) {
+    const s1 = new Set(Object.keys(o1))
+    const s2 = new Set(Object.keys(o2))
+    return s2.difference(s1)
+  }
+
+  function removedKeys(o1, o2) {
+    const s1 = new Set(Object.keys(o1))
+    const s2 = new Set(Object.keys(o2))
+    return s1.difference(s2)
+  }
 
   async function searchTags(query) {
     fetchingTags.value = true
@@ -84,91 +87,50 @@
 </script>
 
 <template>
-  <div id="main-page">
-    <div id="available-tags">
-      <v-container>
-        <v-combobox
-          v-model="selectedTags"
-          v-model:search="tagSearch"
-          :clear-on-select="false"
-          :items="matchingTagIds"
-          no-filter
-          :loading="fetchingTags"
-          label="Tags"
-          placeholder="Search"
-          multiple
-          closable-chips
-          chips
+  <v-container>
+    <v-combobox
+      v-model="selectedTags"
+      v-model:search="tagSearch"
+      :clear-on-select="false"
+      :items="matchingTagIds"
+      no-filter
+      :loading="fetchingTags"
+      label="Tags"
+      placeholder="Search"
+      multiple
+    >
+      <template v-slot:selection="data">
+        <v-chip
+          :key="data.item.value"
+          v-bind="data.attrs"
+          :disabled="data.disabled"
+          :model-value="data.selected"
+          @click="selectTag(data.item.value)"
         >
-          <template v-slot:selection="data">
-            <v-chip
-              :key="data.item.value"
-              v-bind="data.attrs"
-              :disabled="data.disabled"
-              :model-value="data.selected"
-              size="small"
-              @click:close="data.parent.selectItem(data.item)"
-            >
-              <vueScopeComponent :id="data.item.value" :path="['name']" />
-            </v-chip>
-          </template>
-        </v-combobox>
-      </v-container>
-    </div>
-    <div
-      v-if="viewTag"
-      :key="viewTag"
-      id="edit-tag-wrapper"
-    >
-      <TagViewer
-        :id="viewTag"
-        @close="viewTag = null"
-      />
-    </div>
-    <div
-      v-else
-      id="matching-content"
-    >
-      <TagMatches
-        :key="Object.keys(selectedTags).join(',')"
-        :ids="Object.keys(selectedTags)"
-      />
-    </div>
+          <vueScopeComponent
+            :id="data.item.value"
+            :path="['name']"
+          />
+        </v-chip>
+      </template>
+    </v-combobox>
+  </v-container>
+  <div
+    v-if="viewTag"
+    :key="viewTag"
+  >
+    <TagViewer
+      :id="viewTag"
+      @close="viewTag = null"
+    />
+  </div>
+  <div v-else>
+    <TagMatches
+      :key="Object.keys(selectedTags).join(',')"
+      :ids="Object.keys(selectedTags)"
+    />
   </div>
 </template>
 
 <style scoped>
-
-  #main-page
-  {
-    top: 0;
-    left: 0;
-    position: absolute;
-    overflow: scroll;
-    width: 100vw;
-    height: 100vh;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    display: flex;
-  }
-
-  #main-page::-webkit-scrollbar {
-    display: none;
-  }
-
-  #matching-content
-  {
-    flex-grow: 1;
-  }
-
-  .tag
-  {
-    cursor: pointer;
-  }
-
-  .tag.selected
-  {
-    background: chartreuse;
-  }
-
 </style>
