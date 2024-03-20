@@ -7,13 +7,19 @@
 
   const matches = ref([])
   const loading = ref(true)
+  let lastPromise = null
 
   update()
   watch(() => props.ids, () => update())
 
   async function update() {
     loading.value = true
-    await new Promise(r => setTimeout(r, 300))
+    const thisPromise = new Promise(r => setTimeout(r, 300))
+    lastPromise = thisPromise
+    await thisPromise
+
+    if (thisPromise !== lastPromise) return
+
     matches.value = (
       await Agent.query('taggings', [ props.ids ])
     ).map(({ content_id: id }) => ({ name: id, owner: id, tags: id }))
