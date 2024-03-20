@@ -113,6 +113,24 @@
           />
         </v-chip>
       </template>
+      <template v-slot:item="data">
+        <v-list-item
+          v-bind="data.props"
+          :key="data.item.value"
+        >
+          <template v-slot:prepend>
+            <v-icon
+              :icon="`fa-regular fa-square${ selectedTags.includes(data.item.value) ? '-check' : '' }`"
+            />
+          </template>
+          <template v-slot:title>
+            <vueScopeComponent
+              :id="data.item.value"
+              :path="['name']"
+            />
+          </template>
+        </v-list-item>
+      </template>
     </v-combobox>
   </v-container>
   <div
