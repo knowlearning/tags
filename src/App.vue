@@ -58,18 +58,11 @@
 
   async function searchTags(query) {
     fetchingTags.value = true
-    if (query === '') {
-      if (showArchived.value) {
-        matchingTags.value = await Agent.query('my-archived-tags')
-      }
-      else {
-        matchingTags.value = await Agent.query('my-tags')
-      }
-    }
-    else {
-      matchingTags.value = await Agent.query('search', [query])
-    }
-    console.log('GOR MATCHING TAGS!!!!!!!!!!', matchingTags.value)
+
+    if (query !== '') matchingTags.value = await Agent.query('search', [query])
+    else if (showArchived.value) matchingTags.value = await Agent.query('my-archived-tags')
+    else matchingTags.value = await Agent.query('my-tags')
+
     fetchingTags.value = false
   }
 
