@@ -1,7 +1,7 @@
 <script setup>
   import { ref, watch, computed } from 'vue'
   import { validate as isUUID } from 'uuid'
-  import vueScopeComponent from '@knowlearning/agents/vue/3/components/scope.vue'
+  import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import TagViewer from './tag-viewer.vue'
   import TagMatches from './tag-matches.vue'
 
@@ -130,22 +130,23 @@
         </v-list-item>
       </template>
     </v-combobox>
+    <div
+      v-if="viewTag"
+      :key="viewTag"
+    >
+      <TagViewer
+        :id="viewTag"
+        @close="viewTag = null"
+      />
+    </div>
+    <div v-else>
+      <TagMatches
+        v-if="selectedTags.length"
+        :key="selectedTags.join(',')"
+        :ids="selectedTags"
+      />
+    </div>
   </v-container>
-  <div
-    v-if="viewTag"
-    :key="viewTag"
-  >
-    <TagViewer
-      :id="viewTag"
-      @close="viewTag = null"
-    />
-  </div>
-  <div v-else>
-    <TagMatches
-      :key="Object.keys(selectedTags).join(',')"
-      :ids="Object.keys(selectedTags)"
-    />
-  </div>
 </template>
 
 <style scoped>
