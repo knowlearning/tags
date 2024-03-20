@@ -1,15 +1,18 @@
 <script setup>
-  import { ref, watch } from 'vue'
+  import { ref, watch, computed } from 'vue'
+  import { validate as isUUID } from 'uuid'
   import vueScopeComponent from '@knowlearning/agents/vue/3/components/scope.vue'
   import TagViewer from './tag-viewer.vue'
   import TagMatches from './tag-matches.vue'
 
   const matchingTags = ref([])
   const tagSearch = ref('')
-  const selectedTags = ref({})
+  const selectedTags = ref([])
   const fetchingTags = ref(false)
   const viewTag = ref(null)
   const showArchived = ref(false)
+
+  const matchingTagIds = computed(() => matchingTags.value.map(({ id }) => id))
 
   if (!Set.prototype.difference) {
     Set.prototype.difference = function(otherSet) {
@@ -43,7 +46,14 @@
 
   searchTags('')
 
+  watch(tagSearch, () => searchTags(tagSearch.value))
   watch(showArchived, () => searchTags(''))
+
+  watch(selectedTags, () => {
+    if (selectedTags.value.length && !isUUID(selectedTags.value[selectedTags.value.length - 1])) {
+      selectedTags.value.pop()
+    }
+  })
 
 
   async function searchTags(query) {
@@ -59,6 +69,7 @@
     else {
       matchingTags.value = await Agent.query('search', [query])
     }
+    console.log('GOR MATCHING TAGS!!!!!!!!!!', matchingTags.value)
     fetchingTags.value = false
   }
 
@@ -73,39 +84,43 @@
 
     viewTag.value = id
   }
+
+  function validateItems(items) {
+   items.forEach()
+  }
 </script>
 
 <template>
   <div id="main-page">
     <div id="available-tags">
-      <div v-for="v, id in selectedTags">
-        <vueScopeComponent :id="id" :path="['name']" />
-        <button @click="delete selectedTags[id]">X</button>
-      </div>
-      <div>
-        <input
-          v-model="tagSearch"
-          placeholder="search"
-          @keypress.enter="searchTags(tagSearch)"
-        />
-        <button @click="searchTags(tagSearch)">search</button>
-        <button @click="create">create</button>
-        <input type="checkbox" v-model="showArchived" id="show-archived" >
-        <label for="show-archived">show archived</label>
-      </div>
-      <div
-        v-for="{ id } in matchingTags"
-        @click="selectedTags[id] ? delete selectedTags[id] : selectedTags[id] = true"
-        :class="{
-          tag: true,
-          selected: !!selectedTags[id]
-        }"
-      >
-        <vueScopeComponent :id="id" :path="['name']" />
-        <button @click.stop="viewTag = id">
-          view
-        </button>
-      </div>
+      <v-container>
+        <v-combobox
+          v-model="selectedTags"
+          v-model:search="tagSearch"
+          :clear-on-select="false"
+          :items="matchingTagIds"
+          no-filter
+          :loading="fetchingTags"
+          label="Tags"
+          placeholder="Search"
+          multiple
+          closable-chips
+          chips
+        >
+          <template v-slot:selection="data">
+            <v-chip
+              :key="data.item.value"
+              v-bind="data.attrs"
+              :disabled="data.disabled"
+              :model-value="data.selected"
+              size="small"
+              @click:close="data.parent.selectItem(data.item)"
+            >
+              <vueScopeComponent :id="data.item.value" :path="['name']" />
+            </v-chip>
+          </template>
+        </v-combobox>
+      </v-container>
     </div>
     <div
       v-if="viewTag"
