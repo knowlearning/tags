@@ -11,8 +11,17 @@
   const fetchingTags = ref(false)
   const viewTag = ref(null)
   const showArchived = ref(false)
+  const tagAppState = ref(null)
 
   const matchingTagIds = computed(() => matchingTags.value.map(({ id }) => id))
+
+  Agent
+    .state('application')
+    .then(state => {
+      if (!state.selected) state.selected = []
+      selectedTags.value = state.selected
+      tagAppState.value = state
+    })
 
   if (!Set.prototype.difference) {
     Set.prototype.difference = function(otherSet) {
@@ -41,6 +50,7 @@
     if (selectedTags.value.length && !isUUID(selectedTags.value[selectedTags.value.length - 1])) {
       selectedTags.value.pop()
     }
+    tagAppState.value.selected = JSON.parse(JSON.stringify(selectedTags.value))
   })
 
   function selectTag(id) {
