@@ -9,11 +9,14 @@ dependencies:
     specifier: ^6.5.1
     version: 6.5.1
   '@knowlearning/agents':
-    specifier: ^0.9.125
-    version: 0.9.125
+    specifier: ^0.9.128
+    version: 0.9.128
   '@vitejs/plugin-basic-ssl':
     specifier: ^1.1.0
     version: 1.1.0(vite@5.1.4)
+  uuid:
+    specifier: ^9.0.1
+    version: 9.0.1
   vue:
     specifier: ^3.4.19
     version: 3.4.19
@@ -247,8 +250,8 @@ packages:
   /@jridgewell/sourcemap-codec@1.4.15:
     resolution: {integrity: sha512-eF2rxCRulEKXHTRiDrDy6erMYWqNw4LPdQ8UQA4huuxaQsVeRPFl2oM8oDGxMFhJUWZf9McpLtJasDDZb/Bpeg==}
 
-  /@knowlearning/agents@0.9.125:
-    resolution: {integrity: sha512-X1iqX/K57DW4/WQUfpGvYi9dL8w7a+IYIN9ud3s/FjKb7PI0EfmrNO/FmZ+sGPnhGv/xNyhANeDbnhNW+vrCOg==}
+  /@knowlearning/agents@0.9.128:
+    resolution: {integrity: sha512-b88hjxN6DW6CilOPjwJHrmXWQguoNt49jscGRi/TWRFmaKnJj7HZAcrQ1t4uxM/gaNZLw1fU2M3WBHUTvdkIqA==}
     dependencies:
       fast-json-patch: 3.1.1
       uuid: 8.3.2
@@ -545,6 +548,11 @@ packages:
 
   /uuid@8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
+    hasBin: true
+    dev: false
+
+  /uuid@9.0.1:
+    resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
     hasBin: true
     dev: false
 

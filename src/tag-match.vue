@@ -21,33 +21,24 @@
 </script>
 
 <template>
-  <tr>
-    <td>{{ id }}</td>
-    <td>
-      <vueScopeComponent :id="id" metadata :path="['owner']" />
-    </td>
-    <td>
-      <span
-        v-for="{ tag_id } in matches"
-        class="match"
-        @click="() => {
-          if (!myTags[tag_id]) myTags[tag_id] = {}
-          myTags[tag_id][id] = false
-          update()
-        }"
-      >
-        <vueScopeComponent :id="tag_id" :path="['name']" />
-      </span>
-    </td>
-  </tr>
+  <v-progress-circular
+    v-if="fetching"
+    indeterminate
+  />
+  <v-chip
+    v-else
+    v-for="{ tag_id } in matches"
+    class="mr-2 mt-1 mb-1"
+    size="small"
+    @click="() => {
+      if (!myTags[tag_id]) myTags[tag_id] = {}
+      myTags[tag_id][id] = false
+      update()
+    }"
+  >
+    <vueScopeComponent :id="tag_id" :path="['name']" />
+  </v-chip>
 </template>
 
 <style scoped>
-  .match
-  {
-    margin-right: 4px;
-    padding: 4px;
-    white-space: nowrap;
-    background: chartreuse;
-  }
 </style>

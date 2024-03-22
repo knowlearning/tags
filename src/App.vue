@@ -1,15 +1,35 @@
 <script setup>
-  import { ref, watch } from 'vue'
-  import vueScopeComponent from '@knowlearning/agents/vue/3/components/scope.vue'
+  import { ref, watch, computed } from 'vue'
+  import { validate as isUUID } from 'uuid'
+  import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import TagViewer from './tag-viewer.vue'
   import TagMatches from './tag-matches.vue'
 
   const matchingTags = ref([])
-  const tagSearch = ref('')
-  const selectedTags = ref({})
   const fetchingTags = ref(false)
-  const viewTag = ref(null)
   const showArchived = ref(false)
+  const tagAppState = ref(null)
+
+  const matchingTagIds = computed(() => matchingTags.value.map(({ id }) => id))
+
+  Agent
+    .state('application')
+    .then(state => {
+      if (!state.tagSearch) state.tagSearch = ''
+      if (!state.selected) state.selected = []
+      if (!state.vueTag) state.viewTag = null
+      tagAppState.value = state
+
+
+      watch(() => tagAppState.value.tagSearch, () => searchTags(tagAppState.value.tagSearch))
+      watch(showArchived, () => searchTags(''))
+      watch(() => tagAppState.value.selected, () => {
+        const selected = tagAppState.value.selected
+        if (selected.length && !isUUID(selected[selected.length - 1])) {
+          selected.pop()
+        }
+      })
+    })
 
   if (!Set.prototype.difference) {
     Set.prototype.difference = function(otherSet) {
@@ -29,6 +49,13 @@
     }
   }
 
+  searchTags('')
+
+  function selectTag(id) {
+    tagAppState.value.viewTag = tagAppState.value.viewTag === id ? null : id
+    tagAppState.value.menuOpen = false
+  }
+
   function addedKeys(o1, o2) {
     const s1 = new Set(Object.keys(o1))
     const s2 = new Set(Object.keys(o2))
@@ -41,126 +68,105 @@
     return s1.difference(s2)
   }
 
-  searchTags('')
-
-  watch(showArchived, () => searchTags(''))
-
-
   async function searchTags(query) {
     fetchingTags.value = true
-    if (query === '') {
-      if (showArchived.value) {
-        matchingTags.value = await Agent.query('my-archived-tags')
-      }
-      else {
-        matchingTags.value = await Agent.query('my-tags')
-      }
-    }
-    else {
-      matchingTags.value = await Agent.query('search', [query])
-    }
+
+    if (query !== '') matchingTags.value = await Agent.query('search', [query])
+    else if (showArchived.value) matchingTags.value = await Agent.query('my-archived-tags')
+    else matchingTags.value = await Agent.query('my-tags')
+
     fetchingTags.value = false
   }
 
   async function create() {
-    const name = tagSearch.value.trim()
-    if (!name) alert('Please enter name')
+    const name = tagAppState.value.tagSearch.value.trim()
 
     const id = await Agent.create({
       active_type: 'application/json;type=tag-type',
       active: { name, description: 'A new tag' }
     })
 
-    viewTag.value = id
+    tagAppState.value.tagSearch = ''
+    tagAppState.value.selected.push(id)
+    tagAppState.value.viewTag = id
   }
 </script>
 
 <template>
-  <div id="main-page">
-    <div id="available-tags">
-      <div v-for="v, id in selectedTags">
-        <vueScopeComponent :id="id" :path="['name']" />
-        <button @click="delete selectedTags[id]">X</button>
-      </div>
-      <div>
-        <input
-          v-model="tagSearch"
-          placeholder="search"
-          @keypress.enter="searchTags(tagSearch)"
-        />
-        <button @click="searchTags(tagSearch)">search</button>
-        <button @click="create">create</button>
-        <input type="checkbox" v-model="showArchived" id="show-archived" >
-        <label for="show-archived">show archived</label>
-      </div>
-      <div
-        v-for="{ id } in matchingTags"
-        @click="selectedTags[id] ? delete selectedTags[id] : selectedTags[id] = true"
-        :class="{
-          tag: true,
-          selected: !!selectedTags[id]
-        }"
-      >
-        <vueScopeComponent :id="id" :path="['name']" />
-        <button @click.stop="viewTag = id">
-          view
-        </button>
-      </div>
-    </div>
+  <v-container v-if="tagAppState">
+    <v-combobox
+      v-model="tagAppState.selected"
+      v-model:search="tagAppState.tagSearch"
+      v-model:menu="tagAppState.menuOpen"
+      :clear-on-select="false"
+      :items="matchingTagIds"
+      placeholder="Enter search or new tag name"
+      no-filter
+      :loading="fetchingTags"
+      label="Tags"
+      multiple
+    >
+      <template v-slot:append-inner>
+        <v-btn
+          v-if="tagAppState.tagSearch.trim()"
+          @click="create"
+        >
+          Create
+        </v-btn>
+      </template>
+      <template v-slot:selection="data">
+        <v-chip
+          :key="data.item.value"
+          v-bind="data.attrs"
+          :color="tagAppState.viewTag === data.item.value ? 'primary' : ''"
+          :variant="tagAppState.viewTag === data.item.value ? 'flat' : 'tonal'"
+          :disabled="data.disabled"
+          :model-value="data.selected"
+          @click="selectTag(data.item.value)"
+        >
+          <vueScopeComponent
+            :id="data.item.value"
+            :path="['name']"
+          />
+        </v-chip>
+      </template>
+      <template v-slot:item="data">
+        <v-list-item
+          v-bind="data.props"
+          :key="data.item.value"
+        >
+          <template v-slot:prepend>
+            <v-icon
+              :icon="`fa-regular fa-square${ tagAppState.selected.includes(data.item.value) ? '-check' : '' }`"
+            />
+          </template>
+          <template v-slot:title>
+            <vueScopeComponent
+              :id="data.item.value"
+              :path="['name']"
+            />
+          </template>
+        </v-list-item>
+      </template>
+    </v-combobox>
     <div
-      v-if="viewTag"
-      :key="viewTag"
-      id="edit-tag-wrapper"
+      v-if="tagAppState.viewTag"
+      :key="tagAppState.viewTag"
     >
       <TagViewer
-        :id="viewTag"
-        @close="viewTag = null"
+        :id="tagAppState.viewTag"
+        @close="tagAppState.viewTag = null"
       />
     </div>
-    <div
-      v-else
-      id="matching-content"
-    >
+    <div v-else>
       <TagMatches
-        :key="Object.keys(selectedTags).join(',')"
-        :ids="Object.keys(selectedTags)"
+        v-if="tagAppState.selected.length"
+        :key="tagAppState.selected.join(',')"
+        :ids="tagAppState.selected"
       />
     </div>
-  </div>
+  </v-container>
 </template>
 
 <style scoped>
-
-  #main-page
-  {
-    top: 0;
-    left: 0;
-    position: absolute;
-    overflow: scroll;
-    width: 100vw;
-    height: 100vh;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    display: flex;
-  }
-
-  #main-page::-webkit-scrollbar {
-    display: none;
-  }
-
-  #matching-content
-  {
-    flex-grow: 1;
-  }
-
-  .tag
-  {
-    cursor: pointer;
-  }
-
-  .tag.selected
-  {
-    background: chartreuse;
-  }
-
 </style>

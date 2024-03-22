@@ -1,38 +1,57 @@
 <script setup>
   import { ref, watch } from 'vue'
+  import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import TagMatch from './tag-match.vue'
 
-  const { ids } = defineProps({ ids: Array })
+  const props = defineProps({ ids: Array })
 
   const matches = ref([])
-  const fetching = ref(false)
-
-  async function update() {
-    fetching.value = true
-    await new Promise(r => setTimeout(r, 300))
-    matches.value = await Agent.query('taggings', [ ids ])
-    fetching.value = false
-  }
+  const loading = ref(true)
+  let lastPromise = null
 
   update()
+  watch(() => props.ids, () => update())
+
+  async function update() {
+    loading.value = true
+    const thisPromise = new Promise(r => setTimeout(r, 300))
+    lastPromise = thisPromise
+    await thisPromise
+
+    if (thisPromise !== lastPromise) return
+
+    matches.value = (
+      await Agent.query('taggings', [ props.ids ])
+    ).map(({ content_id: id }) => ({ name: id, owner: id, tags: id }))
+    loading.value = false
+  }
+
 </script>
 
 <template>
-  <table>
-    <thead>
-      <tr>
-        <th>Content</th>
-        <th>Owner</th>
-        <th>Tags</th>
-      </tr>
-    </thead>
-    <tbody>
-      <TagMatch
-        v-for="{ content_id, } in matches"
-        :id="content_id"
+  <v-data-table
+    sticky
+    :items="matches"
+    :loading="loading"
+  >
+    <template v-slot:item.id="data">
+      <vueScopeComponent
+        :id="data.value"
+        metadata
+        :path="['name']"
       />
-    </tbody>
-  </table>
+    </template>
+    <template v-slot:item.owner="data">
+      <vueScopeComponent
+        :id="data.value"
+        metadata
+        :path="['owner']"
+      />
+    </template>
+    <template v-slot:item.tags="data">
+      <TagMatch :id="data.value" />
+    </template>
+  </v-data-table>
 </template>
 
 <style scoped>
