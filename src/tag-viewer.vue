@@ -19,7 +19,7 @@
   const userIsOwner = computed(() => environment.value.auth.user === tagTypeMetadata.value.owner)
 
   function addTag(tag, content) {
-    if (!myTags.value[tag]) myTags.value[content] = {}
+    if (!myTags.value[tag]) myTags.value[tag] = {}
     myTags.value[tag][content] = { value: true }
   }
 
