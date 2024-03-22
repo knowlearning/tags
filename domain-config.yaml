@@ -72,16 +72,28 @@ postgres:
       FROM tag_types
       WHERE to_tsvector('english', name) @@ plainto_tsquery('english', $1)
          OR to_tsvector('english', description) @@ plainto_tsquery('english', $1)
-    taggings: |
+    taggings-intersection: |
       SELECT
         content,
         partition
       FROM taggings
       WHERE tag = ANY($1)
-        AND partition = $REQUESTER
         AND active IS TRUE
       GROUP BY content, partition
       HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($1, 1)
+    taggings-for-tag: |
+      SELECT
+        content,
+        partition,
+        contributor
+      FROM taggings
+      WHERE tag = $1
+        AND active IS TRUE
+    tagging-contributor: |
+      SELECT contributor
+      FROM taggings
+      WHERE tag = $1
+        AND contributor = $2
     tags-for-content: |
       SELECT DISTINCT tag
       FROM taggings
@@ -140,10 +152,16 @@ agent: |
 
       if (scope === 'tags') {
         Agent.log('GOT TAGGING PATCH', patch)
-        patch.forEach(async ({ path, value }) => {
+        patch.forEach(async ({ path, value: patchValue }) => {
           if (path.length === 2) {
             const [ tag, content ] = path
-            const id = `tagging/${tag}/${content}`
+            const {
+              partition=user,
+              contributor=user,
+              value
+            } = patchValue
+
+            const id = `tagging/${JSON.stringify([partition, tag, content])}`
             const tagging = await Agent.state(id)
             const md = await Agent.metadata(id)
 
@@ -152,6 +170,7 @@ agent: |
             const taggingData = {
               tag,
               content,
+              contributor,
               partition: user, // TODO: collect partition from patch value
               active: !!value
             }

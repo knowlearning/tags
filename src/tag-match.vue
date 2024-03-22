@@ -32,7 +32,7 @@
     size="small"
     @click="() => {
       if (!myTags[tag]) myTags[tag] = {}
-      myTags[tag][id] = false
+      myTags[tag][id] = { value: null }
       update()
     }"
   >

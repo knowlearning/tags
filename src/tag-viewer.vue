@@ -20,7 +20,7 @@
 
   function addTag(tag, content) {
     if (!myTags.value[tag]) myTags.value[content] = {}
-    myTags.value[tag][content] = true
+    myTags.value[tag][content] = { value: true }
   }
 
 </script>

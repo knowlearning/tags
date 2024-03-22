@@ -14,15 +14,17 @@
 
   async function update() {
     loading.value = true
+
     const thisPromise = new Promise(r => setTimeout(r, 300))
     lastPromise = thisPromise
     await thisPromise
 
     if (thisPromise !== lastPromise) return
 
-    matches.value = (
-      await Agent.query('taggings', [ props.ids ])
-    ).map(({ tag, partition, content }) => ({ name: content, contributor: 'TODO', partition, tags: content  }))
+    matches.value = (await Agent.query('taggings-intersection', [ props.ids ])).map(
+      ({ tag, partition, content }) => ({ partition, name: content, contributor: 'TODO', tags: content  })
+    )
+
     loading.value = false
   }
 
