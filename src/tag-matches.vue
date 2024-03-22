@@ -2,6 +2,7 @@
   import { ref, watch } from 'vue'
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import TagMatch from './tag-match.vue'
+  import TagContributor from './tag-contributor.vue'
 
   const props = defineProps({ ids: Array })
 
@@ -22,7 +23,21 @@
     if (thisPromise !== lastPromise) return
 
     matches.value = (await Agent.query('taggings-intersection', [ props.ids ])).map(
-      ({ tag, partition, content }) => ({ partition, name: content, contributor: 'TODO', tags: content  })
+      ({ partition, content }) => {
+        const rowData = {
+          partition,
+          name: content
+        }
+
+        if (props.ids.length === 1) {
+          const tag = props.ids[0]
+          rowData.contributor = { tag, partition, content }
+        }
+
+        rowData.other_tags = content
+
+        return rowData
+      }
     )
 
     loading.value = false
@@ -50,7 +65,14 @@
         :path="['owner']"
       />
     </template>
-    <template v-slot:item.tags="data">
+    <template v-slot:item.contributor="{ value: { tag, partition, content } }">
+      <TagContributor
+        :tag="tag"
+        :partition="partition"
+        :content="content"
+      />
+    </template>
+    <template v-slot:item.other_tags="data">
       <TagMatch :id="data.value" />
     </template>
   </v-data-table>
