@@ -27,16 +27,16 @@
   />
   <v-chip
     v-else
-    v-for="{ tag_id } in matches"
+    v-for="{ tag } in matches"
     class="mr-2 mt-1 mb-1"
     size="small"
     @click="() => {
-      if (!myTags[tag_id]) myTags[tag_id] = {}
-      myTags[tag_id][id] = false
+      if (!myTags[tag]) myTags[tag] = {}
+      myTags[tag][id] = false
       update()
     }"
   >
-    <vueScopeComponent :id="tag_id" :path="['name']" />
+    <vueScopeComponent :id="tag" :path="['name']" />
   </v-chip>
 </template>
 

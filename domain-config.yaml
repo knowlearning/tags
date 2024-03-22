@@ -73,11 +73,14 @@ postgres:
       WHERE to_tsvector('english', name) @@ plainto_tsquery('english', $1)
          OR to_tsvector('english', description) @@ plainto_tsquery('english', $1)
     taggings: |
-      SELECT content
+      SELECT
+        content,
+        partition
       FROM taggings
       WHERE tag = ANY($1)
+        AND partition = $REQUESTER
         AND active IS TRUE
-      GROUP BY content
+      GROUP BY content, partition
       HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($1, 1)
     tags-for-content: |
       SELECT DISTINCT tag
@@ -129,37 +132,33 @@ agent: |
 
   const TAGGING_TYPE = 'application/json;type=tagging'
 
-  const activeUsers = await Agent.state('active-users')
-
   Agent.on('child', child => {
     const { environment: { user } } = child
 
-    activeUsers[user] = Date.now()
-
     child.on('mutate', async mutation => {
       const { scope, patch } = mutation
-      activeUsers[user] = Date.now()
 
       if (scope === 'tags') {
+        Agent.log('GOT TAGGING PATCH', patch)
         patch.forEach(async ({ path, value }) => {
           if (path.length === 2) {
             const [ tag, content ] = path
-            const taggingId = `tagging/${tagId}/${content}`
-            const tagging = await Agent.state(taggingId)
-            const md = await Agent.metadata(taggingId)
+            const id = `tagging/${tag}/${content}`
+            const tagging = await Agent.state(id)
+            const md = await Agent.metadata(id)
 
             if (md.active_type !== TAGGING_TYPE) md.active_type = TAGGING_TYPE
 
-            tagging.tag = tag
-            tagging.content = content
-            tagging.partition = user // TODO: collect partition from patch value
-            tagging.active = !!value
+            const taggingData = {
+              tag,
+              content,
+              partition: user, // TODO: collect partition from patch value
+              active: !!value
+            }
+
+            Object.assign(tagging, taggingData)
           }
         })
       }
-    })
-
-    child.on('close', info => {
-      delete activeUsers[user]
     })
   })

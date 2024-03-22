@@ -2,9 +2,7 @@
   import { ref, computed } from 'vue'
   import tagMatches from './tag-matches.vue'
 
-  const { id } = defineProps({
-    id: String
-  })
+  const { id } = defineProps({ id: String })
 
   const tagType = ref(null)
   const tagTypeMetadata = ref(null)
@@ -20,9 +18,9 @@
 
   const userIsOwner = computed(() => environment.value.auth.user === tagTypeMetadata.value.owner)
 
-  function addTag(tagId, contentId) {
-    if (!myTags.value[tagId]) myTags.value[tagId] = {}
-    myTags.value[tagId][contentId] = true
+  function addTag(tag, content) {
+    if (!myTags.value[tag]) myTags.value[content] = {}
+    myTags.value[tag][content] = true
   }
 
 </script>
