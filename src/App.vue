@@ -79,7 +79,7 @@
   }
 
   async function create() {
-    const name = tagAppState.value.tagSearch.value.trim()
+    const name = tagAppState.value.tagSearch.trim()
 
     const id = await Agent.create({
       active_type: 'application/json;type=tag-type',
