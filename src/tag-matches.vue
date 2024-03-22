@@ -22,7 +22,7 @@
 
     matches.value = (
       await Agent.query('taggings', [ props.ids ])
-    ).map(({ content_id: id }) => ({ name: id, owner: id, tags: id }))
+    ).map(({ partition, content: id }) => ({ name: id, contributor: id, partition, tags: id  }))
     loading.value = false
   }
 
