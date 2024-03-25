@@ -14,7 +14,7 @@ tag-<script setup>
   Agent
     .query('tagging-contributor', [partition, tag, target])
     .then(response => {
-      contributor.value = response[0].contributor
+      contributor.value = response[0]?.contributor || null
       loading.value = false
     })
 

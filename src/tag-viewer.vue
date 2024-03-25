@@ -51,7 +51,7 @@
       </div>
       <p>tag id:{{ id }}</p>
       <p>{{ tagType.description }}</p>
-      <tagMatches :ids="[id]" />
+      <tagMatches :id="id" />
 
       <v-text-field
         label="New Tag"

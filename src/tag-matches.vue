@@ -4,11 +4,25 @@
   import TagMatch from './tag-match.vue'
   import TagContributor from './tag-contributor.vue'
 
-  const props = defineProps({ ids: Array })
+  const props = defineProps({ id: String, ids: Array })
 
   const matches = ref([])
   const loading = ref(true)
   let lastPromise = null
+
+  const headers = ref([
+    { key: 'partition', title: 'Partition' },
+    { key: 'target', title: 'Target' },
+    { key: 'other_tags', title: 'Other Tags' }
+  ])
+
+  if (props.id) {
+    headers.value.unshift({ key: 'remove', title: '' })
+    headers.value.splice(-1, 0, {
+      key: 'contributor',
+      title: 'Contributor'
+    })
+  }
 
   update()
   watch(() => props.ids, () => update())
@@ -22,25 +36,33 @@
 
     if (thisPromise !== lastPromise) return
 
-    matches.value = (await Agent.query('taggings-intersection', [ props.ids ])).map(
+    const query = () => {
+      if (props.id) return Agent.query('taggings-for-tag', [props.id])
+      else return Agent.query('taggings-intersection', [ props.ids ])
+    }
+
+    matches.value = (await query()).map(
       ({ partition, target }) => {
         const rowData = {
+          remove: target,
           partition,
-          target
+          target,
+          contributor: { tag: props.id, partition, target },
+          other_tags: target
         }
-
-        if (props.ids.length === 1) {
-          const tag = props.ids[0]
-          rowData.contributor = { tag, partition, target }
-        }
-
-        rowData.other_tags = target
 
         return rowData
       }
     )
 
     loading.value = false
+  }
+
+  //  TODO: move this to a store so store manages user tags state centrally
+  async function removeTagging(target) {
+    const tags = await Agent.state('tags')
+    tags[props.id][target] = { value: null }
+    console.log('REMOVING!!!!', tags, props.id, target)
   }
 
 </script>
@@ -50,12 +72,20 @@
     sticky
     :items="matches"
     :loading="loading"
+    :headers="headers"
   >
     <template v-slot:item.id="data">
       <vueScopeComponent
         :id="data.value"
         metadata
         :path="['name']"
+      />
+    </template>
+    <template v-slot:item.remove="data">
+      <v-btn
+        variant="plain"
+        icon="fa-solid fa-remove"
+        @click="removeTagging(data.value)"
       />
     </template>
     <template v-slot:item.owner="data">

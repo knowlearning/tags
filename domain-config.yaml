@@ -80,15 +80,18 @@ postgres:
       FROM taggings
       WHERE tag = ANY($1)
         AND active IS TRUE
+        AND target IS NOT NULL -- TODO: remove this requirement (introduced because of malformed data when 'target' column was 'content')
       GROUP BY target, partition
       HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($1, 1)
     taggings-for-tag: |
       SELECT
+        id AS tagging,
         target,
         partition,
         contributor
       FROM taggings
       WHERE tag = $1
+        AND target IS NOT NULL -- TODO: remove this requirement (introduced because of malformed data when 'target' column was 'content')
         AND active IS TRUE
     tagging-contributor: |
       SELECT contributor
