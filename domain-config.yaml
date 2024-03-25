@@ -18,7 +18,7 @@ postgres:
         target: TEXT
         partition: TEXT
         contributor: TEXT
-        active: BOOLEAN
+        value: JSON
   functions:
     same_domain_authorization:
       returns: BOOLEAN
@@ -79,8 +79,7 @@ postgres:
         partition
       FROM taggings
       WHERE tag = ANY($1)
-        AND active IS TRUE
-        AND target IS NOT NULL -- TODO: remove this requirement (introduced because of malformed data when 'target' column was 'content')
+        AND value IS NOT NULL
       GROUP BY target, partition
       HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($1, 1)
     taggings-for-tag: |
@@ -88,11 +87,11 @@ postgres:
         id AS tagging,
         target,
         partition,
-        contributor
+        contributor,
+        value
       FROM taggings
       WHERE tag = $1
-        AND target IS NOT NULL -- TODO: remove this requirement (introduced because of malformed data when 'target' column was 'content')
-        AND active IS TRUE
+        AND value IS NOT NULL
     tagging-contributor: |
       SELECT contributor
       FROM taggings
@@ -103,7 +102,7 @@ postgres:
       SELECT DISTINCT tag
       FROM taggings
       WHERE target = $1
-        AND active IS TRUE
+        AND value IS NOT NULL
   crossDomainQueries:
     search-tags:
       domains:
@@ -128,7 +127,7 @@ postgres:
         SELECT target
         FROM taggings
         WHERE tag = ANY($1)
-          AND active IS TRUE
+          AND value IS NOT NULL
         GROUP BY target
         HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($1, 1)
     taggings-for-target:
@@ -142,7 +141,7 @@ postgres:
         SELECT DISTINCT tag
         FROM taggings
         WHERE target = $1
-          AND active IS TRUE
+          AND value IS NOT NULL
 agent: |
   import Agent from 'npm:@knowlearning/agents/deno.js'
   import * as uuid from "https://deno.land/std@0.207.0/uuid/mod.ts";
@@ -176,8 +175,9 @@ agent: |
               tag,
               target,
               contributor,
+              //  TODO: consider making 'authority' the agent that specified contributor
               partition: user, // TODO: collect partition from patch value
-              active: !!value
+              value
             }
 
             Object.assign(tagging, taggingData)

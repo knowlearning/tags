@@ -12,15 +12,20 @@
 
   const headers = ref([
     { key: 'partition', title: 'Partition' },
-    { key: 'target', title: 'Target' },
-    { key: 'other_tags', title: 'Other Tags' }
+    { key: 'target', title: 'Target' }
   ])
 
   if (props.id) {
     headers.value.unshift({ key: 'remove', title: '' })
-    headers.value.splice(-1, 0, {
-      key: 'contributor',
-      title: 'Contributor'
+    headers.value.push(
+      { key: 'contributor', title: 'Contributor' },
+      { key: 'value', title: 'Value' }
+    )
+  }
+  else {
+    headers.value.push({
+      key: 'other_tags',
+      title: 'Other Tags'
     })
   }
 
@@ -42,13 +47,14 @@
     }
 
     matches.value = (await query()).map(
-      ({ partition, target }) => {
+      ({ partition, target, value }) => {
         const rowData = {
           remove: target,
           partition,
           target,
           contributor: { tag: props.id, partition, target },
-          other_tags: target
+          other_tags: target,
+          value
         }
 
         return rowData
@@ -104,6 +110,9 @@
     </template>
     <template v-slot:item.other_tags="data">
       <TagMatch :id="data.value" />
+    </template>
+    <template v-slot:item.value="data">
+      <pre>{{ data.value }}</pre>
     </template>
   </v-data-table>
 </template>
