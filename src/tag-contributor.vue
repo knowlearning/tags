@@ -2,17 +2,17 @@ tag-<script setup>
   import { ref, watch } from 'vue'
   import vueScopeComponent from '@knowlearning/agents/vue/3/components/scope.vue'
 
-  const { partition, tag, content } = defineProps({
+  const { partition, tag, target } = defineProps({
     partition: String,
     tag: String,
-    content: String
+    target: String
   })
 
   const contributor = ref(null)
   const loading = ref(true)
 
   Agent
-    .query('tagging-contributor', [partition, tag, content])
+    .query('tagging-contributor', [partition, tag, target])
     .then(response => {
       contributor.value = response[0].contributor
       loading.value = false

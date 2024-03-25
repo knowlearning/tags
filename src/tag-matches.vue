@@ -23,18 +23,18 @@
     if (thisPromise !== lastPromise) return
 
     matches.value = (await Agent.query('taggings-intersection', [ props.ids ])).map(
-      ({ partition, content }) => {
+      ({ partition, target }) => {
         const rowData = {
           partition,
-          name: content
+          target
         }
 
         if (props.ids.length === 1) {
           const tag = props.ids[0]
-          rowData.contributor = { tag, partition, content }
+          rowData.contributor = { tag, partition, target }
         }
 
-        rowData.other_tags = content
+        rowData.other_tags = target
 
         return rowData
       }
@@ -65,11 +65,11 @@
         :path="['owner']"
       />
     </template>
-    <template v-slot:item.contributor="{ value: { tag, partition, content } }">
+    <template v-slot:item.contributor="{ value: { tag, partition, target } }">
       <TagContributor
         :tag="tag"
         :partition="partition"
-        :content="content"
+        :target="target"
       />
     </template>
     <template v-slot:item.other_tags="data">

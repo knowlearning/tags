@@ -13,7 +13,7 @@
   async function update() {
     fetching.value = true
     await new Promise(r => setTimeout(r, 300))
-    matches.value = await Agent.query('tags-for-content', [ id ])
+    matches.value = await Agent.query('taggings-for-target', [ id ])
     fetching.value = false
   }
 

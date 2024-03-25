@@ -15,7 +15,7 @@ postgres:
       type: application/json;type=tagging
       columns:
         tag: TEXT
-        content: TEXT
+        target: TEXT
         partition: TEXT
         contributor: TEXT
         active: BOOLEAN
@@ -75,16 +75,16 @@ postgres:
          OR to_tsvector('english', description) @@ plainto_tsquery('english', $1)
     taggings-intersection: |
       SELECT
-        content,
+        target,
         partition
       FROM taggings
       WHERE tag = ANY($1)
         AND active IS TRUE
-      GROUP BY content, partition
+      GROUP BY target, partition
       HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($1, 1)
     taggings-for-tag: |
       SELECT
-        content,
+        target,
         partition,
         contributor
       FROM taggings
@@ -95,11 +95,11 @@ postgres:
       FROM taggings
       WHERE partition = $1
         AND tag = $2
-        AND content = $3
-    tags-for-content: |
+        AND target = $3
+    taggings-for-target: |
       SELECT DISTINCT tag
       FROM taggings
-      WHERE content = $1
+      WHERE target = $1
         AND active IS TRUE
   crossDomainQueries:
     search-tags:
@@ -122,13 +122,13 @@ postgres:
       - thailand.pilaproject.org
       - app.pilaproject.org
       body: |
-        SELECT content
+        SELECT target
         FROM taggings
         WHERE tag = ANY($1)
           AND active IS TRUE
-        GROUP BY content
+        GROUP BY target
         HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($1, 1)
-    tags-for-content:
+    taggings-for-target:
       domains:
       - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
@@ -138,7 +138,7 @@ postgres:
       body: |
         SELECT DISTINCT tag
         FROM taggings
-        WHERE content = $1
+        WHERE target = $1
           AND active IS TRUE
 agent: |
   import Agent from 'npm:@knowlearning/agents/deno.js'
@@ -156,14 +156,14 @@ agent: |
         Agent.log('GOT TAGGING PATCH', patch)
         patch.forEach(async ({ path, value: patchValue }) => {
           if (path.length === 2) {
-            const [ tag, content ] = path
+            const [ tag, target ] = path
             const {
               partition=user,
               contributor=user,
               value
             } = patchValue
 
-            const id = `tagging/${JSON.stringify([partition, tag, content])}`
+            const id = `tagging/${JSON.stringify([partition, tag, target])}`
             const tagging = await Agent.state(id)
             const md = await Agent.metadata(id)
 
@@ -171,7 +171,7 @@ agent: |
 
             const taggingData = {
               tag,
-              content,
+              target,
               contributor,
               partition: user, // TODO: collect partition from patch value
               active: !!value
