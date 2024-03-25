@@ -2,7 +2,7 @@
   import { ref, computed } from 'vue'
   import tagMatches from './tag-matches.vue'
 
-  const { id } = defineProps({ id: String })
+  const props = defineProps({ partition: String, id: String })
 
   const tagType = ref(null)
   const tagTypeMetadata = ref(null)
@@ -12,15 +12,15 @@
   const newTaggingContent = ref('')
 
   Agent.state('tags').then(state => myTags.value = state)
-  Agent.state(id).then(state => tagType.value = state)
-  Agent.metadata(id).then(md => tagTypeMetadata.value = md)
+  Agent.state(props.id).then(state => tagType.value = state)
+  Agent.metadata(props.id).then(md => tagTypeMetadata.value = md)
   Agent.environment().then(env => environment.value = env)
 
   const userIsOwner = computed(() => environment.value.auth.user === tagTypeMetadata.value.owner)
 
-  function addTag(tag, target) {
+  function addTag(partition, tag, target) {
     if (!myTags.value[tag]) myTags.value[tag] = {}
-    myTags.value[tag][target] = { value: true }
+    myTags.value[tag][target] = { value: true, partition }
   }
 
 </script>
@@ -49,16 +49,19 @@
         >Edit</button>
         <button @click="$emit('close')">Close</button>
       </div>
-      <p>tag id:{{ id }}</p>
+      <p>tag id:{{ props.id }}</p>
       <p>{{ tagType.description }}</p>
-      <tagMatches :id="id" />
+      <tagMatches
+        :partition="props.partition"
+        :id="props.id"
+      />
 
       <v-text-field
         label="New Tag"
         placeholder="Enter tag name"
         v-model="newTaggingContent"
         @keypress.enter="() => {
-          addTag(id, newTaggingContent)
+          addTag(props.partition, props.id, newTaggingContent)
           newTaggingContent = ''
         }"
       />

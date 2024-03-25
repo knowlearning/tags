@@ -4,14 +4,13 @@
   import TagMatch from './tag-match.vue'
   import TagContributor from './tag-contributor.vue'
 
-  const props = defineProps({ id: String, ids: Array })
+  const props = defineProps({ partition: String, id: String, ids: Array })
 
   const matches = ref([])
   const loading = ref(true)
   let lastPromise = null
 
   const headers = ref([
-    { key: 'partition', title: 'Partition' },
     { key: 'target', title: 'Target' }
   ])
 
@@ -42,15 +41,14 @@
     if (thisPromise !== lastPromise) return
 
     const query = () => {
-      if (props.id) return Agent.query('taggings-for-tag', [props.id])
-      else return Agent.query('taggings-intersection', [ props.ids ])
+      if (props.id) return Agent.query('taggings-for-tag', [props.id, props.partition])
+      else return Agent.query('taggings-intersection', [props.ids, props.partition])
     }
 
     matches.value = (await query()).map(
       ({ partition, target, value }) => {
         const rowData = {
           remove: target,
-          partition,
           target,
           contributor: { tag: props.id, partition, target },
           other_tags: target,

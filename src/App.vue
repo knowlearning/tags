@@ -14,11 +14,18 @@
 
   Agent
     .state('application')
-    .then(state => {
+    .then(async state => {
       if (!state.tagSearch) state.tagSearch = ''
       if (!state.selected) state.selected = []
       if (!state.vueTag) state.viewTag = null
+      if (!state.partitions) state.partitions = []
       tagAppState.value = state
+
+      Agent.environment().then(({ auth: { user } }) => {
+        if (!state.partitions.includes(user)) {
+          state.partitions.unshift(user)
+        }
+      })
 
 
       watch(() => tagAppState.value.tagSearch, () => searchTags(tagAppState.value.tagSearch))
@@ -93,77 +100,99 @@
 </script>
 
 <template>
-  <v-container v-if="tagAppState">
+  <v-container v-if="tagAppState && tagAppState.partitions">
     <v-combobox
-      v-model="tagAppState.selected"
-      v-model:search="tagAppState.tagSearch"
-      v-model:menu="tagAppState.menuOpen"
-      :clear-on-select="false"
-      :items="matchingTagIds"
-      placeholder="Enter search or new tag name"
-      no-filter
-      :loading="fetchingTags"
-      label="Tags"
-      multiple
+      :key="JSON.stringify(tagAppState.partitions)"
+      v-model="tagAppState.partition"
+      :items="tagAppState.partitions"
+      label="Partition"
     >
       <template v-slot:append-inner>
         <v-btn
-          v-if="tagAppState.tagSearch.trim()"
-          @click="create"
+          v-if="!tagAppState.partitions.includes(tagAppState.partition?.trim())"
+          @click="tagAppState.partitions.push(tagAppState.partition?.trim())"
         >
-          Create
+          Add Partition
         </v-btn>
       </template>
-      <template v-slot:selection="data">
-        <v-chip
-          :key="data.item.value"
-          v-bind="data.attrs"
-          :color="tagAppState.viewTag === data.item.value ? 'primary' : ''"
-          :variant="tagAppState.viewTag === data.item.value ? 'flat' : 'tonal'"
-          :disabled="data.disabled"
-          :model-value="data.selected"
-          @click="selectTag(data.item.value)"
-        >
-          <vueScopeComponent
-            :id="data.item.value"
-            :path="['name']"
-          />
-        </v-chip>
-      </template>
-      <template v-slot:item="data">
-        <v-list-item
-          v-bind="data.props"
-          :key="data.item.value"
-        >
-          <template v-slot:prepend>
-            <v-icon
-              :icon="`fa-regular fa-square${ tagAppState.selected.includes(data.item.value) ? '-check' : '' }`"
-            />
-          </template>
-          <template v-slot:title>
+    </v-combobox>
+    <div
+      v-if="tagAppState.partition"
+      :key="tagAppState.partition"
+    >
+      <v-combobox
+        v-model="tagAppState.selected"
+        v-model:search="tagAppState.tagSearch"
+        v-model:menu="tagAppState.menuOpen"
+        :clear-on-select="false"
+        :items="matchingTagIds"
+        placeholder="Enter search or new tag name"
+        no-filter
+        :loading="fetchingTags"
+        label="Tags"
+        multiple
+      >
+        <template v-slot:append-inner>
+          <v-btn
+            v-if="tagAppState.tagSearch.trim()"
+            @click="create"
+          >
+            Create
+          </v-btn>
+        </template>
+        <template v-slot:selection="data">
+          <v-chip
+            :key="data.item.value"
+            v-bind="data.attrs"
+            :color="tagAppState.viewTag === data.item.value ? 'primary' : ''"
+            :variant="tagAppState.viewTag === data.item.value ? 'flat' : 'tonal'"
+            :disabled="data.disabled"
+            :model-value="data.selected"
+            @click="selectTag(data.item.value)"
+          >
             <vueScopeComponent
               :id="data.item.value"
               :path="['name']"
             />
-          </template>
-        </v-list-item>
-      </template>
-    </v-combobox>
-    <div
-      v-if="tagAppState.viewTag"
-      :key="tagAppState.viewTag"
-    >
-      <TagViewer
-        :id="tagAppState.viewTag"
-        @close="tagAppState.viewTag = null"
-      />
-    </div>
-    <div v-else>
-      <TagMatches
-        v-if="tagAppState.selected.length"
-        :key="tagAppState.selected.join(',')"
-        :ids="tagAppState.selected"
-      />
+          </v-chip>
+        </template>
+        <template v-slot:item="data">
+          <v-list-item
+            v-bind="data.props"
+            :key="data.item.value"
+          >
+            <template v-slot:prepend>
+              <v-icon
+                :icon="`fa-regular fa-square${ tagAppState.selected.includes(data.item.value) ? '-check' : '' }`"
+              />
+            </template>
+            <template v-slot:title>
+              <vueScopeComponent
+                :id="data.item.value"
+                :path="['name']"
+              />
+            </template>
+          </v-list-item>
+        </template>
+      </v-combobox>
+      <div
+        v-if="tagAppState.viewTag"
+        :key="tagAppState.viewTag"
+      >
+        <TagViewer
+          :partition="tagAppState.partition"
+          :id="tagAppState.viewTag"
+          @close="tagAppState.viewTag = null"
+        />
+      </div>
+      <div v-else>
+        <TagMatches
+          v-if="tagAppState.selected.length"
+          :key="tagAppState.selected.join(',')"
+          :partition="tagAppState.partition"
+          :ids="tagAppState.selected"
+        />
+      </div>
     </div>
   </v-container>
 </template>

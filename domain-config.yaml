@@ -75,10 +75,10 @@ postgres:
          OR to_tsvector('english', description) @@ plainto_tsquery('english', $1)
     taggings-intersection: |
       SELECT
-        target,
-        partition
+        target
       FROM taggings
       WHERE tag = ANY($1)
+        AND partition = $2
         AND value IS NOT NULL
       GROUP BY target, partition
       HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($1, 1)
@@ -86,11 +86,11 @@ postgres:
       SELECT
         id AS tagging,
         target,
-        partition,
         contributor,
         value
       FROM taggings
       WHERE tag = $1
+        AND partition = $2
         AND value IS NOT NULL
     tagging-contributor: |
       SELECT contributor
@@ -176,7 +176,7 @@ agent: |
               target,
               contributor,
               //  TODO: consider making 'authority' the agent that specified contributor
-              partition: user, // TODO: collect partition from patch value
+              partition,
               value
             }
 
