@@ -145,6 +145,23 @@ postgres:
         FROM taggings
         WHERE target = $1
           AND value IS NOT NULL
+    taggings-intersection:
+      domains:
+      - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
+      - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
+      - matching-customizer-reference.netlify.app
+      - thailand.pilaproject.org
+      - app.pilaproject.org
+      body: |
+        SELECT
+          target
+        FROM taggings
+        WHERE tag = ANY($1)
+          AND partition = $2
+          AND value IS NOT NULL
+        GROUP BY target, partition
+        HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($1, 1)
+
 agent: |
   import Agent from 'npm:@knowlearning/agents/deno.js'
   import * as uuid from "https://deno.land/std@0.207.0/uuid/mod.ts";
