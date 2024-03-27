@@ -159,14 +159,15 @@ agent: |
 
       if (scope === 'tags') {
         Agent.log('GOT TAGGING PATCH', patch)
-        patch.forEach(async ({ path, value: patchValue }) => {
+        patch.forEach(async ({ path, value: patchValue={} }) => {
           if (path.length === 2) {
             const [ tag, target ] = path
+
             const {
               partition=user,
               contributor=user,
-              value
-            } = patchValue
+              value=null
+            } = patchValue || {}
 
             const id = `tagging/${JSON.stringify([partition, tag, target])}`
             const tagging = await Agent.state(id)
