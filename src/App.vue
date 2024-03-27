@@ -186,6 +186,7 @@
         />
       </div>
       <div v-else>
+        <div class="text-h3 mb-4 mt-4">Taggings</div>
         <TagMatches
           v-if="tagAppState.selected.length"
           :key="tagAppState.selected.join(',')"
