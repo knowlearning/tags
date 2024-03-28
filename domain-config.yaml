@@ -205,7 +205,7 @@ agent: |
             if (partition === user) apply()
             else if (isPILAPartition(partition)) {
               if (tag === ADMIN_TAG) {
-                isSuperAdmin(user) ? apply() : reject()
+                isSuperAdmin(partition, user) ? apply() : reject()
               }
               else if (tag === PILA_CONTENT_TAG) {
                 await isAdmin(partition, user) ? apply() : reject()
@@ -224,7 +224,7 @@ agent: |
   function isPILAPartition(partition) {
     return [
       PILA_INTERNATIONAL_PARTITION,
-      PILA_INTERNATIONAL_PARTITION
+      PILA_THAILAND_PARTITION
     ].includes(partition)
   }
 
@@ -246,7 +246,7 @@ agent: |
 
   async function isAdmin(partition, user) {
     return (
-      isSuperAdmin(user) ||
+      isSuperAdmin(partition, user) ||
       await hasTag(partition, ADMIN_TAG, user)
     )
   }
