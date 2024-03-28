@@ -108,7 +108,10 @@
       />
     </template>
     <template v-slot:item.other_tags="data">
-      <TagMatch :id="data.value" />
+      <TagMatch
+        :partition="props.partition"
+        :id="data.value"
+      />
     </template>
     <template v-slot:item.value="data">
       <pre>{{ data.value }}</pre>

@@ -2,7 +2,7 @@
   import { ref, watch } from 'vue'
   import vueScopeComponent from '@knowlearning/agents/vue/3/components/scope.vue'
 
-  const { id } = defineProps({ id: String })
+  const props = defineProps({ partition: String, id: String })
 
   const matches = ref([])
   const fetching = ref(false)
@@ -13,7 +13,7 @@
   async function update() {
     fetching.value = true
     await new Promise(r => setTimeout(r, 300))
-    matches.value = await Agent.query('taggings-for-target', [ id ])
+    matches.value = await Agent.query('taggings-for-target', [ props.partition, props.id ])
     fetching.value = false
   }
 
@@ -32,7 +32,7 @@
     size="small"
     @click="() => {
       if (!myTags[tag]) myTags[tag] = {}
-      myTags[tag][id] = { value: null }
+      myTags[tag][props.id] = { value: null }
       update()
     }"
   >
