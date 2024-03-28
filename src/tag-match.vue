@@ -2,7 +2,7 @@
   import { ref, watch } from 'vue'
   import vueScopeComponent from '@knowlearning/agents/vue/3/components/scope.vue'
 
-  const props = defineProps({ partition: String, id: String })
+  const props = defineProps({ partition: String, id: String, ignore: Array })
 
   const matches = ref([])
   const fetching = ref(false)
@@ -13,7 +13,9 @@
   async function update() {
     fetching.value = true
     await new Promise(r => setTimeout(r, 300))
-    matches.value = await Agent.query('taggings-for-target', [ props.partition, props.id ])
+    matches.value = (
+      await Agent.query('taggings-for-target', [ props.partition, props.id ])
+    ).filter(({ tag }) => !props.ignore.includes(tag))
     fetching.value = false
   }
 

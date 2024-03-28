@@ -111,6 +111,7 @@
       <TagMatch
         :partition="props.partition"
         :id="data.value"
+        :ignore="props.ids"
       />
     </template>
     <template v-slot:item.value="data">
