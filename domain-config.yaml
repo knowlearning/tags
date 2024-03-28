@@ -106,7 +106,9 @@ postgres:
         AND target = $3
         AND value IS NOT NULL
     taggings-for-target: |
-      SELECT DISTINCT tag, value
+      SELECT
+        tag,
+        value
       FROM taggings
       WHERE partition = $1
         AND target = $2
