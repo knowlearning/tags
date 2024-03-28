@@ -65,7 +65,7 @@
   //  TODO: move this to a store so store manages user tags state centrally
   async function removeTagging(target) {
     const tags = await Agent.state('tags')
-    tags[props.id][target] = { value: null }
+    tags[props.id][target] = { partition: props.partition, value: null }
     console.log('REMOVING!!!!', tags, props.id, target)
   }
 
