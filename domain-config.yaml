@@ -98,10 +98,18 @@ postgres:
       WHERE partition = $1
         AND tag = $2
         AND target = $3
-    taggings-for-target: |
-      SELECT DISTINCT tag
+    tagging-for-target: |
+      SELECT value
       FROM taggings
-      WHERE target = $1
+      WHERE partition = $1
+        AND tag = $2
+        AND target = $3
+        AND value IS NOT NULL
+    taggings-for-target: |
+      SELECT DISTINCT tag, value
+      FROM taggings
+      WHERE partition = $1
+        AND target = $2
         AND value IS NOT NULL
   crossDomainQueries:
     search-tags:
@@ -168,6 +176,11 @@ agent: |
 
   const TAGGING_TYPE = 'application/json;type=tagging'
 
+  const ADMIN_TAG = "36e1b060-ed49-11ee-be89-5b04faf266ea"
+  const TEACHER_TAG = "49bf66a0-ed49-11ee-be89-5b04faf266ea"
+  const TRAINER_TAG = "8ae541e0-ed49-11ee-be89-5b04faf266ea"
+  const PILA_CONTENT_TAG = "1a53db50-e248-11ee-ab5f-07f4a7408770"
+
   Agent.on('child', child => {
     const { environment: { user } } = child
 
@@ -179,31 +192,71 @@ agent: |
         patch.forEach(async ({ path, value: patchValue={} }) => {
           if (path.length === 2) {
             const [ tag, target ] = path
+            const { partition=user, contributor=user, value=null } = patchValue || {}
 
-            const {
-              partition=user,
-              contributor=user,
-              value=null
-            } = patchValue || {}
+            const apply = () => applyTagging(partition, tag, target, contributor, value)
+            const reject = () => Agent.log(`User tagging rejected`, user, tag)
 
-            const id = `tagging/${JSON.stringify([partition, tag, target])}`
-            const tagging = await Agent.state(id)
-            const md = await Agent.metadata(id)
-
-            if (md.active_type !== TAGGING_TYPE) md.active_type = TAGGING_TYPE
-
-            const taggingData = {
-              tag,
-              target,
-              contributor,
-              //  TODO: consider making 'authority' the agent that specified contributor
-              partition,
-              value
+            if (partition === user) apply()
+            else if (partition === 'PILA') {
+              if (tag === ADMIN_TAG) {
+                isSuperAdmin(user) ? apply() : reject()
+              }
+              else if (tag === PILA_CONTENT_TAG) {
+                await isAdmin(partition, user) ? apply() : reject()
+              }
+              else if (tag === TRAINER_TAG || tag === TEACHER_TAG) {
+                await isTrainer(partition, user) ? apply() : reject()
+              }
             }
-
-            Object.assign(tagging, taggingData)
           }
         })
       }
     })
   })
+
+  function isSuperAdmin(user) {
+    return [
+      "f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f",
+      "c0f3a481-d4d5-4133-a198-94a325aa4536"
+    ].includes(user)
+  }
+
+  async function isAdmin(partition, user) {
+    return (
+      isSuperAdmin(user) ||
+      await hasTag(partition, ADMIN_TAG, user)
+    )
+  }
+
+  async function isTrainer(partition, user) {
+    return (
+      await isAdmin(partition, user) ||
+      await hasTag(partition, TRAINER_TAG, user)
+    )
+  }
+
+  async function hasTag(partition, tag, user) {
+    const tagging = await Agent.query('tagging-for-target', [partition, tag, user])
+    Agent.log('CHECKED OUT TAG', partition, tag, user, tagging)
+    return !!tagging[0]
+  }
+
+  async function applyTagging(partition, tag, target, contributor, value) {
+    const id = `tagging/${JSON.stringify([partition, tag, target])}`
+    const tagging = await Agent.state(id)
+    const md = await Agent.metadata(id)
+
+    if (md.active_type !== TAGGING_TYPE) md.active_type = TAGGING_TYPE
+
+    //  TODO: consider making 'authority' the agent that specified contributor
+    const taggingData = {
+      tag,
+      target,
+      contributor,
+      partition,
+      value
+    }
+
+    Object.assign(tagging, taggingData)
+  }
