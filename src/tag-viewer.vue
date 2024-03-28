@@ -57,8 +57,8 @@
       />
 
       <v-text-field
-        label="New Tag"
-        placeholder="Enter tag name"
+        label="New Tagging"
+        placeholder="Enter New Target"
         v-model="newTaggingContent"
         @keypress.enter="() => {
           addTag(props.partition, props.id, newTaggingContent)
