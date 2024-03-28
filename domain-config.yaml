@@ -178,6 +178,9 @@ agent: |
 
   const TAGGING_TYPE = 'application/json;type=tagging'
 
+  const PILA_INTERNATIONAL_PARTITION = 'PILA'
+  const PILA_THAILAND_PARTITION = 'PILA Thailand'
+
   const ADMIN_TAG = "36e1b060-ed49-11ee-be89-5b04faf266ea"
   const TEACHER_TAG = "49bf66a0-ed49-11ee-be89-5b04faf266ea"
   const TRAINER_TAG = "8ae541e0-ed49-11ee-be89-5b04faf266ea"
@@ -200,7 +203,7 @@ agent: |
             const reject = () => Agent.log(`User tagging rejected`, user, tag)
 
             if (partition === user) apply()
-            else if (partition === 'PILA') {
+            else if (isPILAPartition(partition)) {
               if (tag === ADMIN_TAG) {
                 isSuperAdmin(user) ? apply() : reject()
               }
@@ -211,17 +214,34 @@ agent: |
                 await isTrainer(partition, user) ? apply() : reject()
               }
             }
+            else reject()
           }
         })
       }
     })
   })
 
-  function isSuperAdmin(user) {
+  function isPILAPartition(partition) {
     return [
-      "f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f",
-      "c0f3a481-d4d5-4133-a198-94a325aa4536"
-    ].includes(user)
+      PILA_INTERNATIONAL_PARTITION,
+      PILA_INTERNATIONAL_PARTITION
+    ].includes(partition)
+  }
+
+  function isSuperAdmin(partition, user) {
+    if (partition === PILA_INTERNATIONAL_PARTITION) {
+      return [
+        "f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f",
+        "c0f3a481-d4d5-4133-a198-94a325aa4536"
+      ].includes(user)
+    }
+    else if (partition === PILA_THAILAND_PARTITION) {
+      return [
+        "f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f",
+        "c0f3a481-d4d5-4133-a198-94a325aa4536"
+      ].includes(user)
+    }
+    else return false
   }
 
   async function isAdmin(partition, user) {
