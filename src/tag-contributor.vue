@@ -1,4 +1,4 @@
-tag-<script setup>
+<script setup>
   import { ref, watch } from 'vue'
   import vueScopeComponent from '@knowlearning/agents/vue/3/components/scope.vue'
 
