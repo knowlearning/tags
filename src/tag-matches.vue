@@ -71,6 +71,7 @@
     const tags = await Agent.state('tags')
     if (!tags[props.id]) tags[props.id] = {}
     tags[props.id][target] = { partition: props.partition, value: null }
+    update()
   }
 
 </script>
