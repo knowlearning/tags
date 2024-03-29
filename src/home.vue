@@ -67,7 +67,11 @@
   })
 
   const selectedTags = computed({
-    get() { return route.query.tags || [] },
+    get() {
+      if (!route.query.tags) return []
+      else if (Array.isArray(route.query.tags)) return route.query.tags
+      else return [route.query.tags]
+    },
     set(value) {
       router.push({
         name: route.name,
@@ -204,10 +208,10 @@
       <div v-else>
         <div class="text-h3 mb-4 mt-4">Taggings</div>
         <TagMatches
-          v-if="tagAppState.selected.length"
-          :key="tagAppState.selected.join(',')"
+          v-if="selectedTags && selectedTags.length"
+          :key="selectedTags.join(',')"
           :partition="partition"
-          :ids="tagAppState.selected"
+          :ids="selectedTags"
         />
       </div>
     </div>
