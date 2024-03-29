@@ -46,11 +46,15 @@
     }
 
     matches.value = (await query()).map(
-      ({ partition, target, value }) => {
+      ({ target, value }) => {
         const rowData = {
           remove: target,
           target,
-          contributor: { tag: props.id, partition, target },
+          contributor: {
+            tag: props.id,
+            partition: props.partition,
+            target
+          },
           other_tags: target,
           value
         }
@@ -67,7 +71,6 @@
     const tags = await Agent.state('tags')
     if (!tags[props.id]) tags[props.id] = {}
     tags[props.id][target] = { partition: props.partition, value: null }
-    console.log('REMOVING!!!!', tags, props.id, target)
   }
 
 </script>
