@@ -195,17 +195,7 @@
           </v-list-item>
         </template>
       </v-combobox>
-      <div
-        v-if="tagAppState.viewTag"
-        :key="tagAppState.viewTag"
-      >
-        <TagViewer
-          :partition="partition"
-          :id="tagAppState.viewTag"
-          @close="tagAppState.viewTag = null"
-        />
-      </div>
-      <div v-else>
+      <div>
         <div class="text-h3 mb-4 mt-4">Taggings</div>
         <TagMatches
           v-if="selectedTags && selectedTags.length"

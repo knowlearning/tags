@@ -33,7 +33,7 @@
 
 <template>
   <div v-if="tagType && tagTypeMetadata && environment">
-    <div v-if="environment.auth.user === tagTypeMetadata.owner && editing">
+    <div v-if="userIsOwner && editing">
       <input v-model="tagType.name" />
       <textarea v-model="tagType.description"></textarea>
       <button @click="editing = false">save</button>
@@ -60,9 +60,9 @@
           :disabled="!userIsOwner"
           @click="editing = true"
         >Edit</button>
-        <button @click="$emit('close')">Close</button>
       </div>
-      <p>tag id:{{ props.tag }}</p>
+      <p>id:{{ props.tag }}</p>
+      <p>owner:{{ tagTypeMetadata.owner }}</p>
       <p>{{ tagType.description }}</p>
       <tagMatches
         :key="lastAdd"
