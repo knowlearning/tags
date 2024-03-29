@@ -21,12 +21,10 @@
       { key: 'value', title: 'Value' }
     )
   }
-  else {
-    headers.value.push({
-      key: 'other_tags',
-      title: 'Other Tags'
-    })
-  }
+  headers.value.push({
+    key: 'other_tags',
+    title: 'Other Tags'
+  })
 
   update()
   watch(() => props.ids, () => update())
@@ -115,7 +113,7 @@
       <TagMatch
         :partition="props.partition"
         :id="data.value"
-        :ignore="props.ids"
+        :ignore="props.ids ? props.ids : [props.id]"
       />
     </template>
     <template v-slot:item.value="data">
