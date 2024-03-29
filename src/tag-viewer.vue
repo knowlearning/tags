@@ -2,7 +2,7 @@
   import { ref, computed } from 'vue'
   import tagMatches from './tag-matches.vue'
 
-  const props = defineProps({ partition: String, id: String })
+  const props = defineProps({ partition: String, tag: String })
 
   const tagType = ref(null)
   const tagTypeMetadata = ref(null)
@@ -12,8 +12,8 @@
   const newTaggingContent = ref('')
 
   Agent.state('tags').then(state => myTags.value = state)
-  Agent.state(props.id).then(state => tagType.value = state)
-  Agent.metadata(props.id).then(md => tagTypeMetadata.value = md)
+  Agent.state(props.tag).then(state => tagType.value = state)
+  Agent.metadata(props.tag).then(md => tagTypeMetadata.value = md)
   Agent.environment().then(env => environment.value = env)
 
   const userIsOwner = computed(() => environment.value.auth.user === tagTypeMetadata.value.owner)
@@ -49,11 +49,11 @@
         >Edit</button>
         <button @click="$emit('close')">Close</button>
       </div>
-      <p>tag id:{{ props.id }}</p>
+      <p>tag id:{{ props.tag }}</p>
       <p>{{ tagType.description }}</p>
       <tagMatches
         :partition="props.partition"
-        :id="props.id"
+        :id="props.tag"
       />
 
       <v-text-field
@@ -61,7 +61,7 @@
         placeholder="Enter New Target"
         v-model="newTaggingContent"
         @keypress.enter="() => {
-          addTag(props.partition, props.id, newTaggingContent)
+          addTag(props.partition, props.tag, newTaggingContent)
           newTaggingContent = ''
         }"
       />
