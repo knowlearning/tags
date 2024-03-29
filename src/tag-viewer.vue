@@ -21,9 +21,12 @@
 
   const userIsOwner = computed(() => environment.value.auth.user === tagTypeMetadata.value.owner)
 
+  const lastAdd = ref(null)
+
   function addTag(partition, tag, target) {
     if (!myTags.value[tag]) myTags.value[tag] = {}
     myTags.value[tag][target] = { value: true, partition }
+    lastAdd.value = Date.now()
   }
 
 </script>
@@ -62,6 +65,7 @@
       <p>tag id:{{ props.tag }}</p>
       <p>{{ tagType.description }}</p>
       <tagMatches
+        :key="lastAdd"
         :partition="props.partition"
         :id="props.tag"
       />
