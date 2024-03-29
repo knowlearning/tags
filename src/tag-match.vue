@@ -1,7 +1,10 @@
 <script setup>
   import { ref, watch } from 'vue'
+  import { useRouter, useRoute } from 'vue-router'
   import vueScopeComponent from '@knowlearning/agents/vue/3/components/scope.vue'
 
+  const router = useRouter()
+  const route = useRoute()
   const props = defineProps({ partition: String, id: String, ignore: Array })
 
   const matches = ref([])
@@ -33,9 +36,8 @@
     class="mr-2 mt-1 mb-1"
     size="small"
     @click="() => {
-      if (!myTags[tag]) myTags[tag] = {}
-      myTags[tag][props.id] = { value: null }
-      update()
+      const partition = encodeURIComponent(route.params.partition)
+      router.push(`/${partition}/${tag}`)
     }"
   >
     <vueScopeComponent :id="tag" :path="['name']" />
