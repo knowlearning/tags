@@ -1,6 +1,9 @@
 <script setup>
   import { ref, computed } from 'vue'
+  import { useRouter } from 'vue-router'
   import tagMatches from './tag-matches.vue'
+
+  const router = useRouter()
 
   const props = defineProps({ partition: String, tag: String })
 
@@ -42,7 +45,14 @@
     </div>
     <div v-else>
       <div>
-        <span class="text-h3">{{ tagType.name }}</span>
+        <span class="text-h3">
+          <v-icon
+            icon="fa-solid fa-chevron-left"
+            size="x-small"
+            @click="router.go(-1)"
+          />
+          {{ tagType.name }}
+        </span>
         <button
           :disabled="!userIsOwner"
           @click="editing = true"
