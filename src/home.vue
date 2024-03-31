@@ -8,13 +8,17 @@
 
   const router = useRouter()
   const route = useRoute()
+  const props = defineProps({ partition: String })
 
+  const tagCounts = ref([])
+  const tagSelection= ref([])
   const matchingTags = ref([])
   const fetchingTags = ref(false)
   const showArchived = ref(false)
   const tagAppState = ref(null)
+  const tagSearch = ref('')
 
-  const matchingTagIds = computed(() => matchingTags.value.map(({ id }) => id))
+  const matchingTagIds = computed(() => tagSelection.value.map(index => tagCounts.value[index].tag))
 
   Agent
     .state('application')
@@ -35,10 +39,12 @@
 
   searchTags('')
 
-  const partition = computed({
-    get() { return route.params?.partition },
-    set(value) { router.push(`/${encodeURIComponent(value)}`) }
-  })
+  Agent
+    .query(
+      'tags-with-tagging-counts',
+      [props.partition]
+    )
+    .then(r => tagCounts.value = r)
 
   const selectedTags = computed({
     get() {
@@ -56,9 +62,8 @@
   })
 
   function selectTag(id) {
-    const partition = encodeURIComponent(route.params.partition)
     const tag = encodeURIComponent(id)
-    router.push(`/${partition}/${tag}`)
+    router.push(`/${props.partition}/${tag}`)
   }
 
   async function searchTags(query) {
@@ -71,80 +76,61 @@
     fetchingTags.value = false
   }
 
-  async function create() {
-    const name = tagAppState.value.tagSearch.trim()
-
+  async function createTag(name) {
     const id = await Agent.create({
       active_type: 'application/json;type=tag-type',
       active: { name, description: 'A new tag' }
     })
 
-    tagAppState.value.tagSearch = ''
-    selectedTags.push(id)
+    tagSearch.value = ''
   }
 </script>
 
 <template>
   <v-container v-if="tagAppState">
-    <v-combobox
-      v-model="selectedTags"
-      v-model:search="tagAppState.tagSearch"
-      :clear-on-select="false"
-      :items="matchingTagIds"
-      placeholder="Enter search or new tag name"
-      no-filter
-      :loading="fetchingTags"
-      label="Tags"
-      multiple
-    >
-      <template v-slot:append-inner>
-        <v-btn
-          v-if="tagAppState.tagSearch.trim()"
-          @click="create"
-        >
-          Create
-        </v-btn>
-      </template>
-      <template v-slot:selection="data">
+    <div>
+      <v-chip-group
+        v-model="tagSelection"
+        column
+        multiple
+      >
         <v-chip
-          :key="data.item.value"
-          v-bind="data.attrs"
-          :disabled="data.disabled"
-          :model-value="data.selected"
-          @click="selectTag(data.item.value)"
+          v-for="{ tag, count } in tagCounts"
+          variant="outlined"
+          filter
         >
-          <vueScopeComponent
-            :id="data.item.value"
-            :path="['name']"
-          />
-        </v-chip>
-      </template>
-      <template v-slot:item="data">
-        <v-list-item
-          v-bind="data.props"
-          :key="data.item.value"
-        >
-          <template v-slot:prepend>
-            <v-icon
-              :icon="`fa-regular fa-square${ selectedTags.includes(data.item.value) ? '-check' : '' }`"
-            />
-          </template>
-          <template v-slot:title>
+          
             <vueScopeComponent
-              :id="data.item.value"
+              :id="tag"
               :path="['name']"
             />
-          </template>
-        </v-list-item>
+            <template v-slot:append>
+              <v-avatar
+                class="ml-2"
+                color="surface-variant"
+              >
+                {{ count }}
+              </v-avatar>
+            </template>
+        </v-chip>
+        <v-chip @click.prevent="console.log('woooo!')">+</v-chip>
+      </v-chip-group>
+    </div>
+    <v-text-field
+      label="Search tags"
+      v-model="tagSearch"
+    >
+      <template v-slot:append-inner>
+        <v-btn @click="createTag(tagSearch)">Create</v-btn>
       </template>
-    </v-combobox>
+    </v-text-field>
     <div>
       <div class="text-h3 mb-4 mt-4">Taggings</div>
       <TagMatches
-        v-if="selectedTags && selectedTags.length"
-        :key="selectedTags.join(',')"
-        :partition="partition"
-        :ids="selectedTags"
+        v-if="matchingTagIds && matchingTagIds.length"
+        :key="matchingTagIds.join(',')"
+        :partition="props.partition"
+        :ids="matchingTagIds"
       />
     </div>
   </v-container>

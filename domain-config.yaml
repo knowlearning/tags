@@ -92,6 +92,14 @@ postgres:
       WHERE tag = $1
         AND partition = $2
         AND value IS NOT NULL
+    tags-with-tagging-counts: |
+      SELECT
+        tag,
+        COUNT(target) AS count
+      FROM taggings
+      WHERE partition = $1
+        AND value IS NOT NULL
+      GROUP BY tag
     tagging-contributor: |
       SELECT contributor
       FROM taggings

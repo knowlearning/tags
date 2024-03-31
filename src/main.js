@@ -41,16 +41,11 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/', component: Home },
-    { path: '/:partition', component: Home },
+    { path: '/:partition', component: Home, props: true },
     { path: '/:partition/:tag', component: TagViewer, props: true }
   ]
 })
 
-Agent
-  .environment()
-  .then(({ auth: { provider } }) => {
-    if (provider !== 'google') Agent.login()
-  })
 
 createApp(App)
   .use(router)

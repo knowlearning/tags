@@ -37,8 +37,10 @@
         :image="auth.info.picture"
       />
     </v-toolbar>
-    <v-container :key="partition">
-      <router-view></router-view>
+    <v-container v-if="partition" :key="partition">
+      <router-view v-slot="{ Component, route }">
+        <component :is="Component" :key="route.path" />
+      </router-view>
     </v-container>
   </div>
 </template>
