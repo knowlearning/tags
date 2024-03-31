@@ -49,12 +49,7 @@
     <div v-else>
       <div>
         <span class="text-h3">
-          <v-icon
-            icon="fa-solid fa-chevron-left"
-            size="x-small"
-            @click="router.go(-1)"
-          />
-          {{ tagType.name }}
+          Taggings for "{{ tagType.name }}"
         </span>
         <button
           :disabled="!userIsOwner"

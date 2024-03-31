@@ -21,15 +21,7 @@
     .then(async state => {
       if (!state.tagSearch) state.tagSearch = ''
       if (!state.selected) state.selected = []
-      if (!state.partitions) state.partitions = []
       tagAppState.value = state
-
-      Agent.environment().then(({ auth: { user } }) => {
-        if (!state.partitions.includes(user)) {
-          state.partitions.unshift(user)
-        }
-      })
-
 
       watch(() => tagAppState.value.tagSearch, () => searchTags(tagAppState.value.tagSearch))
       watch(showArchived, () => searchTags(''))
@@ -40,24 +32,6 @@
         }
       })
     })
-
-  if (!Set.prototype.difference) {
-    Set.prototype.difference = function(otherSet) {
-        if (!(otherSet instanceof Set)) {
-            throw new TypeError('Provided argument must be a Set');
-        }
-
-        const differenceSet = new Set();
-
-        for (const element of this) {
-            if (!otherSet.has(element)) {
-                differenceSet.add(element);
-            }
-        }
-
-        return differenceSet;
-    }
-  }
 
   searchTags('')
 
@@ -87,18 +61,6 @@
     router.push(`/${partition}/${tag}`)
   }
 
-  function addedKeys(o1, o2) {
-    const s1 = new Set(Object.keys(o1))
-    const s2 = new Set(Object.keys(o2))
-    return s2.difference(s1)
-  }
-
-  function removedKeys(o1, o2) {
-    const s1 = new Set(Object.keys(o1))
-    const s2 = new Set(Object.keys(o2))
-    return s1.difference(s2)
-  }
-
   async function searchTags(query) {
     fetchingTags.value = true
 
@@ -123,87 +85,67 @@
 </script>
 
 <template>
-  <v-container v-if="tagAppState && tagAppState.partitions">
+  <v-container v-if="tagAppState">
     <v-combobox
-      :key="JSON.stringify(tagAppState.partitions)"
-      v-model="partition"
-      :items="tagAppState.partitions"
-      label="Partition"
+      v-model="selectedTags"
+      v-model:search="tagAppState.tagSearch"
+      :clear-on-select="false"
+      :items="matchingTagIds"
+      placeholder="Enter search or new tag name"
+      no-filter
+      :loading="fetchingTags"
+      label="Tags"
+      multiple
     >
       <template v-slot:append-inner>
         <v-btn
-          v-if="!tagAppState.partitions.includes(partition?.trim())"
-          @click="tagAppState.partitions.push(partition?.trim())"
+          v-if="tagAppState.tagSearch.trim()"
+          @click="create"
         >
-          Add Partition
+          Create
         </v-btn>
       </template>
-    </v-combobox>
-    <div
-      v-if="partition"
-      :key="partition"
-    >
-      <v-combobox
-        v-model="selectedTags"
-        v-model:search="tagAppState.tagSearch"
-        :clear-on-select="false"
-        :items="matchingTagIds"
-        placeholder="Enter search or new tag name"
-        no-filter
-        :loading="fetchingTags"
-        label="Tags"
-        multiple
-      >
-        <template v-slot:append-inner>
-          <v-btn
-            v-if="tagAppState.tagSearch.trim()"
-            @click="create"
-          >
-            Create
-          </v-btn>
-        </template>
-        <template v-slot:selection="data">
-          <v-chip
-            :key="data.item.value"
-            v-bind="data.attrs"
-            :disabled="data.disabled"
-            :model-value="data.selected"
-            @click="selectTag(data.item.value)"
-          >
+      <template v-slot:selection="data">
+        <v-chip
+          :key="data.item.value"
+          v-bind="data.attrs"
+          :disabled="data.disabled"
+          :model-value="data.selected"
+          @click="selectTag(data.item.value)"
+        >
+          <vueScopeComponent
+            :id="data.item.value"
+            :path="['name']"
+          />
+        </v-chip>
+      </template>
+      <template v-slot:item="data">
+        <v-list-item
+          v-bind="data.props"
+          :key="data.item.value"
+        >
+          <template v-slot:prepend>
+            <v-icon
+              :icon="`fa-regular fa-square${ selectedTags.includes(data.item.value) ? '-check' : '' }`"
+            />
+          </template>
+          <template v-slot:title>
             <vueScopeComponent
               :id="data.item.value"
               :path="['name']"
             />
-          </v-chip>
-        </template>
-        <template v-slot:item="data">
-          <v-list-item
-            v-bind="data.props"
-            :key="data.item.value"
-          >
-            <template v-slot:prepend>
-              <v-icon
-                :icon="`fa-regular fa-square${ selectedTags.includes(data.item.value) ? '-check' : '' }`"
-              />
-            </template>
-            <template v-slot:title>
-              <vueScopeComponent
-                :id="data.item.value"
-                :path="['name']"
-              />
-            </template>
-          </v-list-item>
-        </template>
-      </v-combobox>
-      <div>
-        <div class="text-h3 mb-4 mt-4">Taggings</div>
-        <TagMatches
-          v-if="selectedTags && selectedTags.length"
-          :key="selectedTags.join(',')"
-          :partition="partition"
-          :ids="selectedTags"
-        />
-      </div>
+          </template>
+        </v-list-item>
+      </template>
+    </v-combobox>
+    <div>
+      <div class="text-h3 mb-4 mt-4">Taggings</div>
+      <TagMatches
+        v-if="selectedTags && selectedTags.length"
+        :key="selectedTags.join(',')"
+        :partition="partition"
+        :ids="selectedTags"
+      />
     </div>
   </v-container>
 </template>
