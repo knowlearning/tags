@@ -125,7 +125,7 @@
 
 <template>
   <QSelect
-    v-if="partition && tagAppState?.partitions"
+    v-if="tagAppState?.partitions"
     label="partition"
     :options="tagAppState.partitions"
     filled
@@ -140,7 +140,7 @@
         if (!tagAppState.partitions.includes(val)) {
           tagAppState.partitions.push(val)
         }
-        done(val, 'toggle')
+        partition = val
       }
     }"
   />
