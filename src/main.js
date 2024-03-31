@@ -9,6 +9,12 @@ import { createVuetify } from 'vuetify'
 import { aliases, fa } from 'vuetify/iconsets/fa'
 import vuetifyKnowLearningTheme from './vuetify-knowlearning-theme.js'
 
+
+import { Quasar, Notify } from 'quasar'
+import '@quasar/extras/material-icons/material-icons.css'
+import 'quasar/src/css/index.sass'
+
+
 import Home from './home.vue'
 import TagViewer from './tag-viewer.vue'
 
@@ -55,4 +61,9 @@ Agent
 createApp(App)
   .use(router)
   .use(vuetify)
+  .use(Quasar, {
+    plugins: {
+      Notify
+    }
+  })
   .mount('#app')

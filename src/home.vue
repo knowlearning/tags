@@ -5,6 +5,7 @@
   import TagViewer from './tag-viewer.vue'
   import TagMatches from './tag-matches.vue'
   import { useRouter, useRoute } from 'vue-router'
+  import { QSelect } from 'quasar'
 
   const router = useRouter()
   const route = useRoute()
@@ -63,7 +64,7 @@
 
   const partition = computed({
     get() { return route.params?.partition },
-    set(value) { router.push(`/${encodeURIComponent(value)}`) }
+    set(value) { router.push(`/${value ? encodeURIComponent(value) : ''}`) }
   })
 
   const selectedTags = computed({
@@ -123,22 +124,27 @@
 </script>
 
 <template>
+  <QSelect
+    v-if="partition && tagAppState?.partitions"
+    label="partition"
+    :options="tagAppState.partitions"
+    filled
+    v-model="partition"
+    clearable
+    use-input
+    hide-selected
+    fill-input
+    input-debounce="0"
+    @new-value="(val, done) => {
+      if (val.length > 0) {
+        if (!tagAppState.partitions.includes(val)) {
+          tagAppState.partitions.push(val)
+        }
+        done(val, 'toggle')
+      }
+    }"
+  />
   <v-container v-if="tagAppState && tagAppState.partitions">
-    <v-combobox
-      :key="JSON.stringify(tagAppState.partitions)"
-      v-model="partition"
-      :items="tagAppState.partitions"
-      label="Partition"
-    >
-      <template v-slot:append-inner>
-        <v-btn
-          v-if="!tagAppState.partitions.includes(partition?.trim())"
-          @click="tagAppState.partitions.push(partition?.trim())"
-        >
-          Add Partition
-        </v-btn>
-      </template>
-    </v-combobox>
     <div
       v-if="partition"
       :key="partition"
