@@ -39,8 +39,8 @@
     if (thisPromise !== lastPromise) return
 
     const query = () => {
-      if (props.id) return Agent.query('taggings-for-tag', [props.id, props.partition])
-      else return Agent.query('taggings-intersection', [props.ids, props.partition])
+      if (props.id) return Agent.query('taggings-for-tag', [props.partition, props.id])
+      else return Agent.query('taggings-intersection', [props.partition, props.ids])
     }
 
     matches.value = (await query()).map(
