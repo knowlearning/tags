@@ -81,7 +81,7 @@ postgres:
         AND tag = ANY($2)
         AND value IS NOT NULL
       GROUP BY target, partition
-      HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($1, 1)
+      HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($2, 1)
     taggings-for-tag: |
       SELECT
         id AS tagging,
@@ -192,7 +192,7 @@ postgres:
           AND tag = ANY($2)
           AND value IS NOT NULL
         GROUP BY target, partition
-        HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($1, 1)
+        HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($2, 1)
 
 agent: |
   import Agent from 'npm:@knowlearning/agents/deno.js'
