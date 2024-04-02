@@ -207,6 +207,7 @@ agent: |
   const TEACHER_TAG = "49bf66a0-ed49-11ee-be89-5b04faf266ea"
   const TRAINER_TAG = "8ae541e0-ed49-11ee-be89-5b04faf266ea"
   const PILA_CONTENT_TAG = "1a53db50-e248-11ee-ab5f-07f4a7408770"
+  const PILA_COMPETENCY_TAG = "f760dad0-f133-11ee-804e-27f76a81958c"
 
   Agent.on('child', child => {
     const { environment: { user } } = child
@@ -228,11 +229,18 @@ agent: |
             else if (isPILAPartition(partition)) {
               if (isSuperAdmin(partition, user)) apply()
               else if (tag === PILA_CONTENT_TAG) {
-                await isAdmin(partition, user) ? apply() : reject()
+                if (await isAdmin(partition, user)) apply()
+                else reject()
               }
               else if (tag === TRAINER_TAG || tag === TEACHER_TAG) {
-                await isTrainer(partition, user) ? apply() : reject()
+                if (await isTrainer(partition, user)) apply()
+                else reject()
               }
+              else if (await hasTag(partition, PILA_COMPETENCY_TAG, tag)) {
+                if (await isAdmin(partition, user)) apply()
+                else reject()
+              }
+              else reject()
             }
             else reject()
           }
@@ -252,13 +260,15 @@ agent: |
     if (partition === PILA_INTERNATIONAL_PARTITION) {
       return [
         "f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f",
-        "c0f3a481-d4d5-4133-a198-94a325aa4536"
+        "c0f3a481-d4d5-4133-a198-94a325aa4536",
+        "0c9c64fc-559e-40d4-916b-852f6d108a17"
       ].includes(user)
     }
     else if (partition === PILA_THAILAND_PARTITION) {
       return [
         "f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f",
-        "c0f3a481-d4d5-4133-a198-94a325aa4536"
+        "c0f3a481-d4d5-4133-a198-94a325aa4536",
+        "0c9c64fc-559e-40d4-916b-852f6d108a17"
       ].includes(user)
     }
     else return false
