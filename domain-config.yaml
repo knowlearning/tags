@@ -220,24 +220,28 @@ agent: |
         patch.forEach(async ({ path, value: patchValue={} }) => {
           if (path.length === 2) {
             const [ tag, target ] = path
-            const { partition=user, contributor=user, value=null } = patchValue || {}
+            const { partition=user, value=null } = patchValue || {}
+            let contributor = user
+
+            // The only agents able to overwrite contributor are trusted domains
+            if (isTrustedDomain(user)) contributor = patchValue.contributor || user
 
             const apply = () => applyTagging(partition, tag, target, contributor, value)
-            const reject = () => Agent.log(`User tagging rejected`, user, tag)
+            const reject = () => Agent.log(`User tagging rejected`, partition, user, contributor, tag)
 
-            if (partition === user) apply()
+            if (partition === contributor) apply()
             else if (isPILAPartition(partition)) {
-              if (isSuperAdmin(partition, user)) apply()
+              if (isSuperAdmin(partition, contributor)) apply()
               else if (tag === PILA_CONTENT_TAG) {
-                if (await isAdmin(partition, user)) apply()
+                if (await isAdmin(partition, contributor)) apply()
                 else reject()
               }
               else if (tag === TRAINER_TAG || tag === TEACHER_TAG) {
-                if (await isTrainer(partition, user)) apply()
+                if (await isTrainer(partition, contributor)) apply()
                 else reject()
               }
               else if (await hasTag(partition, PILA_COMPETENCY_TAG, tag)) {
-                if (await isAdmin(partition, user)) apply()
+                if (await isAdmin(partition, contributor)) apply()
                 else reject()
               }
               else reject()
@@ -248,6 +252,16 @@ agent: |
       }
     })
   })
+
+  function isTrustedDomain(domain) {
+    return [
+      'app.pilaproject.org',
+      'thailand.pilaproject.org',
+      'f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898',
+      'c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:9898',
+      '0c9c64fc-559e-40d4-916b-852f6d108a17.localhost:9898'
+    ].includes(domain)
+  }
 
   function isPILAPartition(partition) {
     return [
