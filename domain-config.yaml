@@ -226,9 +226,7 @@ agent: |
 
             if (partition === user) apply()
             else if (isPILAPartition(partition)) {
-              if (tag === ADMIN_TAG) {
-                isSuperAdmin(partition, user) ? apply() : reject()
-              }
+              if (isSuperAdmin(partition, user)) apply()
               else if (tag === PILA_CONTENT_TAG) {
                 await isAdmin(partition, user) ? apply() : reject()
               }
