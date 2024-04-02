@@ -11,33 +11,11 @@
   const props = defineProps({ partition: String })
 
   const tagCounts = ref([])
-  const tagSelection= ref([])
   const matchingTags = ref([])
+  const newTagName = ref('')
   const fetchingTags = ref(false)
-  const showArchived = ref(false)
-  const tagAppState = ref(null)
-  const tagSearch = ref('')
 
-  const matchingTagIds = computed(() => tagSelection.value.map(index => tagCounts.value[index].tag))
-
-  Agent
-    .state('application')
-    .then(async state => {
-      if (!state.tagSearch) state.tagSearch = ''
-      if (!state.selected) state.selected = []
-      tagAppState.value = state
-
-      watch(() => tagAppState.value.tagSearch, () => searchTags(tagAppState.value.tagSearch))
-      watch(showArchived, () => searchTags(''))
-      watch(() => tagAppState.value.selected, () => {
-        const selected = tagAppState.value.selected
-        if (selected.length && !isUUID(selected[selected.length - 1])) {
-          selected.pop()
-        }
-      })
-    })
-
-  searchTags('')
+  const matchingTagIds = computed(() => tagSelection.value.map(index => tagCounts.value[index]?.tag).filter(v => v))
 
   Agent
     .query(
@@ -46,48 +24,34 @@
     )
     .then(r => tagCounts.value = r)
 
-  const selectedTags = computed({
+  const tagSelection = computed({
     get() {
-      if (!route.query.tags) return []
-      else if (Array.isArray(route.query.tags)) return route.query.tags
+      if (!route.query.tags || tagCounts.value.length === 0) return []
+      else if (Array.isArray(route.query.tags)) return route.query.tags.map(tag => tagCounts.value.findIndex(tagCount => tag === tagCount.tag))
       else return [route.query.tags]
     },
     set(value) {
+      const tags = value.map(index => tagCounts.value[index]?.tag).filter(v => v)
       router.push({
         name: route.name,
         params: route.params,
-        query: { ...route.query, tags: value }
+        query: { ...route.query, tags }
       })
     }
   })
-
-  function selectTag(id) {
-    const tag = encodeURIComponent(id)
-    router.push(`/${props.partition}/${tag}`)
-  }
-
-  async function searchTags(query) {
-    fetchingTags.value = true
-
-    if (query !== '') matchingTags.value = await Agent.query('search', [query])
-    else if (showArchived.value) matchingTags.value = await Agent.query('my-archived-tags')
-    else matchingTags.value = await Agent.query('my-tags')
-
-    fetchingTags.value = false
-  }
 
   async function createTag(name) {
     const id = await Agent.create({
       active_type: 'application/json;type=tag-type',
       active: { name, description: 'A new tag' }
     })
-
-    tagSearch.value = ''
+    router.push(`/${props.partition}/${id}`)
+    newTagName.value = ''
   }
 </script>
 
 <template>
-  <v-container v-if="tagAppState">
+  <v-container>
     <div>
       <v-chip-group
         v-model="tagSelection"
@@ -113,24 +77,55 @@
               </v-avatar>
             </template>
         </v-chip>
-        <v-chip @click.prevent="console.log('woooo!')">+</v-chip>
       </v-chip-group>
+      <v-dialog max-width="500">
+        <template v-slot:activator="{ props: activatorProps }">
+          <v-chip v-bind="activatorProps">+ Create Tag</v-chip>
+        </template>
+        <template v-slot:default="{ isActive }">
+          <v-card title="New Tag">
+            <v-card-text>
+              <v-text-field
+                autofocus
+                v-model="newTagName"
+                label="Name"
+                @keypress.enter="() => {
+                  createTag(newTagName)
+                  isActive.value = false
+                }"
+              />
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn
+                text="Add"
+                @click="() => {
+                  createTag(newTagName)
+                  isActive.value = false
+                }"
+              ></v-btn>
+              <v-btn
+                text="Cancel"
+                @click="isActive.value = false"
+              ></v-btn>
+            </v-card-actions>
+          </v-card>
+        </template>
+      </v-dialog>
     </div>
-    <v-text-field
-      label="Search tags"
-      v-model="tagSearch"
-    >
-      <template v-slot:append-inner>
-        <v-btn @click="createTag(tagSearch)">Create</v-btn>
-      </template>
-    </v-text-field>
-    <div>
+    <div v-if="matchingTagIds.length > 1">
       <div class="text-h3 mb-4 mt-4">Taggings</div>
       <TagMatches
-        v-if="matchingTagIds && matchingTagIds.length"
         :key="matchingTagIds.join(',')"
         :partition="props.partition"
         :ids="matchingTagIds"
+      />
+    </div>
+    <div v-else-if="matchingTagIds.length === 1">
+      <TagViewer
+        :key="matchingTagIds.join(',')"
+        :partition="props.partition"
+        :tag="matchingTagIds[0]"
       />
     </div>
   </v-container>
