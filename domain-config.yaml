@@ -258,6 +258,7 @@ agent: |
     return [
       'app.pilaproject.org',
       'thailand.pilaproject.org',
+      'matching-customizer-reference.netlify.app',
       'f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898',
       'c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:9898',
       '0c9c64fc-559e-40d4-916b-852f6d108a17.localhost:9898',
