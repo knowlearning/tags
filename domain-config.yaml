@@ -161,7 +161,8 @@ postgres:
       body: |
         SELECT DISTINCT tag
         FROM taggings
-        WHERE target = $1
+        WHERE partition = $1
+          AND target = $2
           AND value IS NOT NULL
     tagging-for-target:
       domains:
