@@ -6,6 +6,7 @@
   const router = useRouter()
 
   const props = defineProps({ partition: String, tag: String })
+  const emit = defineEmits(['tag', 'untag'])
 
   const tagType = ref(null)
   const tagTypeMetadata = ref(null)
@@ -27,6 +28,7 @@
     if (!myTags.value[tag]) myTags.value[tag] = {}
     myTags.value[tag][target] = { value: true, partition }
     lastAdd.value = Date.now()
+    emit('tag')
   }
 
 </script>
@@ -63,6 +65,7 @@
         :key="lastAdd"
         :partition="props.partition"
         :id="props.tag"
+        @untag="id => emit('untag', id)"
       />
 
       <v-text-field

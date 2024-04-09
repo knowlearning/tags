@@ -22,13 +22,27 @@
       'tags-with-tagging-counts',
       [props.partition]
     )
-    .then(r => tagCounts.value = r)
+    .then(r => {
+      tagCounts.value = r
+      availableTags
+        .value
+        .forEach(id => {
+          if (!r.find(({ tag }) => tag === id)) {
+            tagCounts.value.push({ tag: id, count: 0 })
+          }
+        })
+    })
+
+  const availableTags = computed(() => {
+    const { tags } = route.query
+    if (Array.isArray(tags)) return tags
+    else if (tags) return [tags]
+    else return []
+  })
 
   const tagSelection = computed({
     get() {
-      if (!route.query.tags || tagCounts.value.length === 0) return []
-      else if (Array.isArray(route.query.tags)) return route.query.tags.map(tag => tagCounts.value.findIndex(tagCount => tag === tagCount.tag))
-      else return [route.query.tags]
+      return availableTags.value.map(tag => tagCounts.value.findIndex(tagCount => tag === tagCount.tag))
     },
     set(value) {
       const tags = value.map(index => tagCounts.value[index]?.tag).filter(v => v)
@@ -45,12 +59,19 @@
       active_type: 'application/json;type=tag-type',
       active: { name, description: 'A new tag' }
     })
-    router.push(`/${props.partition}/${id}`)
     newTagName.value = ''
+    tagCounts.value.push({ tag: id, count: 0 })
+    selectSingleTag(id)
   }
 
   function selectSingleTag(tag) {
+    console.log(tag, 'selecting!!!')
     tagSelection.value = [tagCounts.value.findIndex(tagCount => tag === tagCount.tag)]
+  }
+
+  function tagCountData(id) {
+    console.log(id, tagCounts)
+    return tagCounts.value.find(({ tag }) => tag === id)
   }
 </script>
 
@@ -119,19 +140,24 @@
         </template>
       </v-dialog>
     </div>
-    <div v-if="matchingTagIds.length > 1">
-      <div class="text-h3 mb-4 mt-4">Taggings</div>
-      <TagMatches
-        :key="matchingTagIds.join(',')"
-        :partition="props.partition"
-        :ids="matchingTagIds"
-      />
+    <div v-if="matchingTagIds.length === 0">
+      Select tags above to filter by
     </div>
     <div v-else-if="matchingTagIds.length === 1">
       <TagViewer
         :key="matchingTagIds.join(',')"
         :partition="props.partition"
         :tag="matchingTagIds[0]"
+        @tag="tagCountData(matchingTagIds[0]).count += 1"
+        @untag="id => tagCountData(id).count -= 1"
+      />
+    </div>
+    <div v-else>
+      <div class="text-h3 mb-4 mt-4">Taggings</div>
+      <TagMatches
+        :key="matchingTagIds.join(',')"
+        :partition="props.partition"
+        :ids="matchingTagIds"
       />
     </div>
   </v-container>

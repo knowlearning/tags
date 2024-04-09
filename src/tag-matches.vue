@@ -5,6 +5,7 @@
   import TagContributor from './tag-contributor.vue'
 
   const props = defineProps({ partition: String, id: String, ids: Array })
+  const emit = defineEmits(['untag'])
 
   const matches = ref([])
   const loading = ref(true)
@@ -70,6 +71,8 @@
     if (!tags[props.id]) tags[props.id] = {}
     tags[props.id][target] = { partition: props.partition, value: null }
     update()
+    console.log('untagging!', props.id)
+    emit('untag', props.id)
   }
 
 </script>
