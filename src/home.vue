@@ -48,6 +48,10 @@
     router.push(`/${props.partition}/${id}`)
     newTagName.value = ''
   }
+
+  function selectSingleTag(tag) {
+    tagSelection.value = [tagCounts.value.findIndex(tagCount => tag === tagCount.tag)]
+  }
 </script>
 
 <template>
@@ -61,6 +65,7 @@
         <v-chip
           v-for="{ tag, count } in tagCounts"
           variant="outlined"
+          @dblclick="selectSingleTag(tag)"
           filter
         >
           
@@ -71,6 +76,7 @@
             <template v-slot:append>
               <v-avatar
                 class="ml-2"
+                style="margin-right: -8px"
                 color="surface-variant"
               >
                 {{ count }}
