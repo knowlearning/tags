@@ -1,6 +1,7 @@
 <script setup>
   import { ref, computed } from 'vue'
   import { useRouter } from 'vue-router'
+  import { validate as isUUID } from 'uuid'
   import tagMatches from './tag-matches.vue'
 
   const router = useRouter()
@@ -24,12 +25,22 @@
 
   const lastAdd = ref(null)
 
-  function addTag(partition, tag, target) {
+  async function addTag(partition, tag, target) {
+    if (!isUUID(target)) target = await createTag(target)
+
     if (!myTags.value[tag]) myTags.value[tag] = {}
     myTags.value[tag][target] = { value: true, partition }
     lastAdd.value = Date.now()
     emit('tag')
   }
+
+  function createTag(name) {
+    return Agent.create({
+      active_type: 'application/json;type=tag-type',
+      active: { name, description: 'A new tag' }
+    })
+  }
+
 
 </script>
 
@@ -72,7 +83,8 @@
         label="New Tagging"
         placeholder="Enter New Target"
         v-model="newTaggingContent"
-        @keypress.enter="() => {
+        @keypress.enter="async () => {
+          if (!isUUID(newTaggingContent)) newTaggingContent = await createTag(newTaggingContent)
           addTag(props.partition, props.tag, newTaggingContent)
           newTaggingContent = ''
         }"
