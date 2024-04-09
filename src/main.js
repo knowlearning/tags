@@ -46,6 +46,12 @@ const router = createRouter({
   ]
 })
 
+router
+  .beforeEach((to, from) => {
+    const { partition } = to.params
+    window.document.title = partition ? `Tags | ${partition}` : 'Tags'
+  })
+
 
 createApp(App)
   .use(router)
