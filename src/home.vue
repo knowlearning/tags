@@ -14,6 +14,9 @@
   const matchingTags = ref([])
   const newTagName = ref('')
   const fetchingTags = ref(false)
+  const myTags = ref(null)
+
+  Agent.state('tags').then(state => myTags.value = state)
 
   const matchingTagIds = computed(() => tagSelection.value.map(index => tagCounts.value[index]?.tag).filter(v => v))
 
@@ -65,13 +68,23 @@
   }
 
   function selectSingleTag(tag) {
-    console.log(tag, 'selecting!!!')
     tagSelection.value = [tagCounts.value.findIndex(tagCount => tag === tagCount.tag)]
   }
 
   function tagCountData(id) {
     console.log(id, tagCounts)
     return tagCounts.value.find(({ tag }) => tag === id)
+  }
+
+  function addTag(partition, tag, target) {
+    if (!myTags.value[tag]) myTags.value[tag] = {}
+    myTags.value[tag][target] = { value: true, partition }
+    tagCountData(tag).count += 1
+  }
+
+  function handleDrop(event, tag) {
+    const target = event.dataTransfer.getData('text')
+    addTag(props.partition, tag, target)
   }
 </script>
 
@@ -87,9 +100,12 @@
           v-for="{ tag, count } in tagCounts"
           variant="outlined"
           @dblclick="selectSingleTag(tag)"
+          draggable
+          @dragstart="$event.dataTransfer.setData('text', tag)"
+          @drop.prevent="e => handleDrop(e, tag)"
+          @dragover.prevent
           filter
         >
-          
             <vueScopeComponent
               :id="tag"
               :path="['name']"

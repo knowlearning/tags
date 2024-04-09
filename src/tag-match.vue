@@ -13,6 +13,8 @@
 
   Agent.state('tags').then(state => myTags.value = state)
 
+  update()
+
   async function update() {
     fetching.value = true
     await new Promise(r => setTimeout(r, 300))
@@ -21,8 +23,6 @@
     ).filter(({ tag }) => !props.ignore.includes(tag))
     fetching.value = false
   }
-
-  update()
 </script>
 
 <template>
@@ -36,8 +36,11 @@
     class="mr-2 mt-1 mb-1"
     size="small"
     @click="() => {
-      const partition = encodeURIComponent(route.params.partition)
-      router.push(`/${partition}/${tag}`)
+      router.push({
+        name: route.name,
+        params: route.params,
+        query: { tags: tag }
+      })
     }"
   >
     <vueScopeComponent :id="tag" :path="['name']" />
