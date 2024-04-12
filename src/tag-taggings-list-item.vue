@@ -10,7 +10,7 @@
     </v-list-item-title>
     <template v-slot:prepend>
       <v-icon
-        v-for="i in props.depth + 1"
+        :style="{ marginLeft: `${ depth * 48 }px`}"
         @click.stop="open = !open"
         :icon="`fa-solid fa-chevron-${ open ? 'down' : 'right'}`"
       />
