@@ -112,6 +112,54 @@ postgres:
       WHERE partition = $1
         AND value IS NOT NULL
       GROUP BY tag
+    top-level-tags: |
+      WITH RECURSIVE roots AS (
+          -- Identify root tags that are not targeted by any other tags
+          SELECT id
+          FROM tag_types
+          WHERE NOT EXISTS (
+              SELECT 1
+              FROM taggings
+              WHERE tag_types.id = target
+                AND taggings.partition = $1
+          ) AND EXISTS (
+              SELECT 1
+              FROM taggings
+              WHERE tag_types.id = tag
+                AND taggings.partition = $1
+          )
+      ),
+      traversal AS (
+          -- Begin traversal from root tags to follow tag-target relationships
+          SELECT tag, target, ARRAY[tag] AS path, ARRAY[target] AS reached, false AS is_cycle
+          FROM taggings
+          WHERE tag IN (SELECT id FROM roots)
+
+          UNION ALL
+
+          -- Continue traversal, tracking paths and reached tags to detect cycles
+          SELECT t.tag, t.target, tt.path || t.tag, tt.reached || t.target, t.tag = ANY(tt.path) OR tt.is_cycle
+          FROM traversal tt
+          JOIN taggings t ON tt.target = t.tag
+          WHERE NOT tt.is_cycle -- Stop recursion when a cycle is detected to avoid infinite loops
+            AND t.partition = $1
+      ),
+      isolated_cycles AS (
+          -- Determine isolated cycles not reachable from any root
+          SELECT tag, MIN(tag) OVER (PARTITION BY array_to_string(path, ',')) AS representative
+          FROM traversal
+          WHERE is_cycle
+          AND tag NOT IN (SELECT DISTINCT UNNEST(reached) FROM traversal)
+      )
+
+      -- Select all root tags and unique representatives from isolated cycles
+      SELECT id AS tag
+      FROM roots
+
+      UNION
+
+      SELECT DISTINCT representative
+      FROM isolated_cycles
     tagging-contributor: |
       SELECT contributor
       FROM taggings

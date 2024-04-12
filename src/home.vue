@@ -23,10 +23,11 @@
 
   Agent
     .query(
-      'tags-with-tagging-counts',
+      'top-level-tags',
       [props.partition]
     )
     .then(r => {
+      console.log('TOP LEVEL TAGS', r)
       tagCounts.value = r
       availableTags
         .value
