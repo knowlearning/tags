@@ -92,6 +92,18 @@ postgres:
       WHERE partition = $1
         AND tag = $2
         AND value IS NOT NULL
+    taggings-targeting-tags: |
+      SELECT
+        taggings.id AS tagging,
+        target,
+        contributor,
+        value
+      FROM taggings
+      JOIN metadata ON metadata.id = taggings.target
+      WHERE partition = $1
+        AND tag = $2
+        AND value IS NOT NULL
+        AND metadata.active_type = 'application/json;type=tag-type'
     tags-with-tagging-counts: |
       SELECT
         tag,

@@ -1,9 +1,10 @@
 <script setup>
-  import { ref, watch, computed } from 'vue'
+  import { ref, reactive, watch, computed } from 'vue'
   import { validate as isUUID } from 'uuid'
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import TagViewer from './tag-viewer.vue'
   import TagMatches from './tag-matches.vue'
+  import TagTaggingsList from './tag-taggings-list.vue'
   import { useRouter, useRoute } from 'vue-router'
 
   const router = useRouter()
@@ -72,7 +73,6 @@
   }
 
   function tagCountData(id) {
-    console.log(id, tagCounts)
     return tagCounts.value.find(({ tag }) => tag === id)
   }
 
@@ -85,6 +85,18 @@
   function handleDrop(event, tag) {
     const target = event.dataTransfer.getData('text')
     addTag(props.partition, tag, target)
+  }
+
+  function addTagToCounts(tag) {
+    let tagCountIndex = tagCounts.value.findIndex(v => v.tag === tag)
+    if (tagCountIndex === -1) {
+      //  TODO: actually get tag count
+      tagCounts.value.push({ count: 0, tag })
+      tagCountIndex = tagCounts.value.length - 1
+    }
+    if (!tagSelection.value.includes(tagCountIndex)) {
+      tagSelection.value = [...tagSelection.value, tagCountIndex]
+    }
   }
 </script>
 
@@ -111,10 +123,24 @@
               :path="['name']"
             />
             <template v-slot:append>
+              <v-menu>
+                <template v-slot:activator="{ props }">
+                  <v-icon
+                    class="ml-2"
+                    v-bind="props"
+                    :icon="`fa-solid fa-tag`"
+                  />
+                </template>
+                <TagTaggingsList
+                  :tag="tag"
+                  :partition="props.partition"
+                  @select="addTagToCounts"
+                />
+              </v-menu>
               <v-avatar
                 class="ml-2"
-                style="margin-right: -8px"
                 color="surface-variant"
+                style="margin-right: -8px"
               >
                 {{ count }}
               </v-avatar>
