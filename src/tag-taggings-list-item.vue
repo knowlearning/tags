@@ -1,5 +1,12 @@
 <template>
   <v-list-item>
+    <template v-slot:prepend>
+      <v-icon
+        :style="{ marginLeft: `${ depth * 48 }px`}"
+        @click.stop="open = !open"
+        :icon="`fa-solid fa-chevron-${ open ? 'down' : 'right'}`"
+      />
+    </template>
     <v-list-item-title
       draggable
       @click="emit('select', props.tag)"
@@ -8,13 +15,6 @@
     >
       <vueScopeComponent :id="props.tag" :path="['name']" />
     </v-list-item-title>
-    <template v-slot:prepend>
-      <v-icon
-        :style="{ marginLeft: `${ depth * 48 }px`}"
-        @click.stop="open = !open"
-        :icon="`fa-solid fa-chevron-${ open ? 'down' : 'right'}`"
-      />
-    </template>
   </v-list-item>
   <TagTaggingsList
     v-if="open"
