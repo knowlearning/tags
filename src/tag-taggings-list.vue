@@ -1,30 +1,29 @@
 <template>
   <v-list>
-    <v-list-item
+    <TagTaggingsListItem
       v-for="({ target }, index) in tagTaggings"
       :key="index"
-      :value="index"
-    >
-      <v-list-item-title
-        draggable
-        @click="emit('select', target)"
-        @dragstart="$event.dataTransfer.setData('text', tag)"
-        @drop.prevent="e => handleDrop(e, tag)"
-        @dragover.prevent
-      >
-        <vueScopeComponent :id="target" :path="['name']" />
-      </v-list-item-title>
-    </v-list-item>
+      :tag="target"
+      :depth="props.depth"
+      :partition="props.partition"
+      @select="tag => emit('select', tag)"
+    />
   </v-list>
 </template>
 
 <script setup>
   import { ref } from 'vue'
-  import { vueScopeComponent } from '@knowlearning/agents/vue.js'
+  import TagTaggingsListItem from './tag-taggings-list-item.vue'
 
   const emit = defineEmits(['select'])
-  const props = defineProps(['tag', 'partition'])
-
+  const props = defineProps({
+    tag: String,
+    partition: String,
+    depth: {
+      type: Number,
+      default: 0
+    }
+  })
   const tagTaggings = ref([])
   const loading = ref(true)
 
