@@ -1,5 +1,7 @@
 <template>
-  <v-list-item>
+  <v-list-item
+    @click="emit('select', props.tag)"
+  >
     <template v-slot:prepend>
       <v-icon
         :style="{ marginLeft: `${ depth * 48 }px`}"
@@ -9,7 +11,6 @@
     </template>
     <v-list-item-title
       draggable
-      @click="emit('select', props.tag)"
       @dragstart="$event.dataTransfer.setData('text', props.tag)"
       @dragover.prevent
     >
