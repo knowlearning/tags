@@ -14,6 +14,7 @@
     </v-list-item-title>
     <template v-slot:append>
       <v-icon
+        v-if="childTags.length"
         :style="{ marginLeft: `${ depth * 48 }px`}"
         @click.stop="open = !open"
         :icon="`fa-solid fa-chevron-${ open ? 'down' : 'right'}`"
@@ -22,7 +23,7 @@
   </v-list-item>
   <TagTaggingsList
     v-if="open"
-    :tag="props.tag"
+    :tags="childTags"
     :partition="props.partition"
     :depth="props.depth + 1"
     @select="tag => emit('select', tag)"
@@ -45,6 +46,12 @@
     }
   })
   const open = ref(false)
+  const childTags = ref([])
+
+  Agent
+    .query('taggings-targeting-tags', [props.partition, props.tag])
+    .then(r => childTags.value = r.map(t => t.target))
+
 </script>
 
 <style scoped>

@@ -12,7 +12,10 @@
         :path="['name']"
       />
       <template v-slot:append>
-        <v-menu v-model="open">
+        <v-menu
+          v-model="open"
+          v-if="childTags.length"
+        >
           <template v-slot:activator="{ props }">
             <v-icon
               class="ml-2"
@@ -29,7 +32,7 @@
             />
           </template>
           <TagTaggingsList
-            :tag="props.tag"
+            :tags="childTags"
             :partition="props.partition"
             @select="tag => emit('select', tag)"
           />
@@ -46,8 +49,15 @@
   const emit = defineEmits(['select'])
   const props = defineProps(['partition', 'tag'])
   const myTags = ref(null)
+  const childTags = ref([])
 
-  Agent.state('tags').then(state => myTags.value = state)
+  Agent
+    .query('taggings-targeting-tags', [props.partition, props.tag])
+    .then(r => childTags.value = r.map(t => t.target))
+
+  Agent
+    .state('tags')
+    .then(state => myTags.value = state)
 
   const open = ref(false)
 

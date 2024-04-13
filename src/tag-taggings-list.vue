@@ -1,9 +1,9 @@
 <template>
   <v-list>
     <TagTaggingsListItem
-      v-for="({ target }, index) in tagTaggings"
-      :key="index"
-      :tag="target"
+      v-for="tag in tags"
+      :key="tag"
+      :tag="tag"
       :depth="props.depth"
       :partition="props.partition"
       @select="tag => emit('select', tag)"
@@ -17,20 +17,11 @@
 
   const emit = defineEmits(['select'])
   const props = defineProps({
-    tag: String,
+    tags: Array,
     partition: String,
     depth: {
       type: Number,
       default: 0
     }
   })
-  const tagTaggings = ref([])
-  const loading = ref(true)
-
-  Agent
-    .query('taggings-targeting-tags', [props.partition, props.tag])
-    .then(r => {
-      tagTaggings.value = r
-      loading.value = false
-    })
 </script>
