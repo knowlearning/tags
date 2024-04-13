@@ -1,11 +1,10 @@
 <script setup>
   import { ref, reactive, watch, computed } from 'vue'
   import { validate as isUUID } from 'uuid'
-  import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import TagViewer from './tag-viewer.vue'
   import TagMatches from './tag-matches.vue'
-  import TagTaggingsList from './tag-taggings-list.vue'
   import { useRouter, useRoute } from 'vue-router'
+  import TopLevelTagChip from './top-level-tag-chip.vue'
 
   const router = useRouter()
   const route = useRoute()
@@ -83,11 +82,6 @@
     tagCountData(tag).count += 1
   }
 
-  function handleDrop(event, tag) {
-    const target = event.dataTransfer.getData('text')
-    addTag(props.partition, tag, target)
-  }
-
   function addTagToCounts(tag) {
     let tagCountIndex = tagCounts.value.findIndex(v => v.tag === tag)
     if (tagCountIndex === -1) {
@@ -109,44 +103,14 @@
         column
         multiple
       >
-        <v-chip
-          v-for="{ tag, count } in tagCounts"
-          variant="outlined"
+        <TopLevelTagChip
+          v-for="{ tag } in tagCounts"
+          :key="tag"
+          :tag="tag"
+          :partition="props.partition"
           @dblclick="selectSingleTag(tag)"
-          draggable
-          @dragstart="$event.dataTransfer.setData('text', tag)"
-          @drop.prevent="e => handleDrop(e, tag)"
-          @dragover.prevent
-          filter
-        >
-            <vueScopeComponent
-              :id="tag"
-              :path="['name']"
-            />
-            <template v-slot:append>
-              <v-menu>
-                <template v-slot:activator="{ props }">
-                  <v-icon
-                    class="ml-2"
-                    v-bind="props"
-                    :icon="`fa-solid fa-tag`"
-                  />
-                </template>
-                <TagTaggingsList
-                  :tag="tag"
-                  :partition="props.partition"
-                  @select="addTagToCounts"
-                />
-              </v-menu>
-              <v-avatar
-                class="ml-2"
-                color="surface-variant"
-                style="margin-right: -8px"
-              >
-                {{ count }}
-              </v-avatar>
-            </template>
-        </v-chip>
+          @select="addTagToCounts"
+        />
       </v-chip-group>
       <v-dialog max-width="500">
         <template v-slot:activator="{ props: activatorProps }">
