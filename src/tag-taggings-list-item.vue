@@ -1,6 +1,6 @@
 <template>
   <v-list-item
-    @click="emit('select', props.tag)"
+    @click.stop.prevent="emit('select', props.tag)"
   >
     <template v-slot:prepend>
       <span :style="`display: block; width: ${depth * 32}px`" />
