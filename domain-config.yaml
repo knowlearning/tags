@@ -122,11 +122,13 @@ postgres:
               FROM taggings
               WHERE tag_types.id = target
                 AND taggings.partition = $1
+                AND taggings.value IS NOT NULL
           ) AND EXISTS (
               SELECT 1
               FROM taggings
               WHERE tag_types.id = tag
                 AND taggings.partition = $1
+                AND taggings.value IS NOT NULL
           )
       ),
       traversal AS (
@@ -143,6 +145,7 @@ postgres:
           JOIN taggings t ON tt.target = t.tag
           WHERE NOT tt.is_cycle -- Stop recursion when a cycle is detected to avoid infinite loops
             AND t.partition = $1
+            AND t.value IS NOT NULL
       ),
       isolated_cycles AS (
           -- Determine isolated cycles not reachable from any root
