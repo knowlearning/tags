@@ -14,6 +14,9 @@
   const matchingTags = ref([])
   const newTagName = ref('')
   const fetchingTags = ref(false)
+  const myTags = ref(null)
+
+  Agent.state('tags').then(state => myTags.value = state)
 
   const matchingTagIds = computed(() => tagSelection.value.map(index => tagCounts.value[index]?.tag).filter(v => v))
 

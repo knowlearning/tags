@@ -19,7 +19,7 @@
               v-bind="props"
               style="
                 margin-right: -12px;
-                padding-right: 8px;
+                padding-right: 12px;
                 margin-left: -4px;
                 padding-left: 4px;
               "
