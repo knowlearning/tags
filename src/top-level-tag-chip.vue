@@ -19,6 +19,8 @@
               v-bind="props"
               style="margin-right: -8px"
               :icon="`fa-solid fa-chevron-${open ? 'down' : 'right'}`"
+              @click.stop
+              @dblclick.stop
             />
           </template>
           <TagTaggingsList
