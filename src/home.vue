@@ -10,12 +10,11 @@
   const route = useRoute()
   const props = defineProps({ partition: String })
 
-  const tagCounts = ref([])
-  const matchingTags = ref([])
+  const selectedTags = ref([])
   const newTagName = ref('')
   const fetchingTags = ref(false)
 
-  const matchingTagIds = computed(() => tagSelection.value.map(index => tagCounts.value[index]?.tag).filter(v => v))
+  const matchingTagIds = computed(() => selectedTagIndexes.value.map(index => selectedTags.value[index]).filter(v => v))
 
   Agent
     .query(
@@ -24,12 +23,12 @@
     )
     .then(r => {
       console.log('TOP LEVEL TAGS', r)
-      tagCounts.value = r
+      selectedTags.value = r.map(({ tag }) => tag)
       availableTags
         .value
         .forEach(id => {
           if (!r.find(({ tag }) => tag === id)) {
-            tagCounts.value.push({ tag: id, count: 0 })
+            selectedTags.value.push(id)
           }
         })
     })
@@ -41,12 +40,12 @@
     else return []
   })
 
-  const tagSelection = computed({
+  const selectedTagIndexes = computed({
     get() {
-      return availableTags.value.map(tag => tagCounts.value.findIndex(tagCount => tag === tagCount.tag))
+      return availableTags.value.map(tag => selectedTags.value.findIndex(t => tag === t))
     },
     set(value) {
-      const tags = value.map(index => tagCounts.value[index]?.tag).filter(v => v)
+      const tags = value.map(index => selectedTags.value[index]).filter(v => v)
       router.push({
         name: route.name,
         params: route.params,
@@ -61,27 +60,32 @@
       active: { name, description: 'A new tag' }
     })
     newTagName.value = ''
-    tagCounts.value.push({ tag: id, count: 0 })
+    selectedTags.value.push(id)
     selectSingleTag(id)
   }
 
   function selectSingleTag(tag) {
-    tagSelection.value = [tagCounts.value.findIndex(tagCount => tag === tagCount.tag)]
+    selectedTagIndexes.value = [selectedTags.value.findIndex(t => tag === t)]
   }
 
-  function tagCountData(id) {
-    return tagCounts.value.find(({ tag }) => tag === id)
-  }
-
-  function addTagToCounts(tag) {
-    let tagCountIndex = tagCounts.value.findIndex(v => v.tag === tag)
+  function addTagToSelection(tag) {
+    let tagCountIndex = selectedTags.value.findIndex(t => t === tag)
     if (tagCountIndex === -1) {
       //  TODO: actually get tag count
-      tagCounts.value.push({ count: 0, tag })
-      tagCountIndex = tagCounts.value.length - 1
+      selectedTags.value.push(tag)
+      tagCountIndex = selectedTags.value.length - 1
     }
-    if (!tagSelection.value.includes(tagCountIndex)) {
-      tagSelection.value = [...tagSelection.value, tagCountIndex]
+    if (!selectedTagIndexes.value.includes(tagCountIndex)) {
+      selectedTagIndexes.value = [...selectedTagIndexes.value, tagCountIndex]
+    }
+  }
+
+  function removeTagFromSelection(tag) {
+    const index = selectedTags.value.findIndex(t => t === tag)
+    if (index > -1) {
+      selectedTagIndexes.value = [
+        ...[...selectedTagIndexes.value].splice(index, 1)
+      ]
     }
   }
 </script>
@@ -90,17 +94,23 @@
   <v-container>
     <div>
       <v-chip-group
-        v-model="tagSelection"
+        v-model="selectedTagIndexes"
         column
         multiple
       >
         <TopLevelTagChip
-          v-for="{ tag } in tagCounts"
+          v-for="tag in selectedTags"
           :key="tag"
           :tag="tag"
           :partition="props.partition"
+          :selected="matchingTagIds"
           @dblclick="selectSingleTag(tag)"
-          @select="addTagToCounts"
+          @select="tag => {
+            if (matchingTagIds.includes(tag)) {
+              removeTagFromSelection(tag)
+            }
+            else addTagToSelection(tag)
+          }"
         />
       </v-chip-group>
       <v-dialog max-width="500">
@@ -146,8 +156,6 @@
         :key="matchingTagIds.join(',')"
         :partition="props.partition"
         :tag="matchingTagIds[0]"
-        @tag="tagCountData(matchingTagIds[0]).count += 1"
-        @untag="id => tagCountData(id).count -= 1"
       />
     </div>
     <div v-else>
