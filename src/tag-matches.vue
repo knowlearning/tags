@@ -1,7 +1,6 @@
 <script setup>
   import { ref, watch } from 'vue'
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
-  import TagMatch from './tag-match.vue'
   import TagContributor from './tag-contributor.vue'
   import ContentName from './content-name.vue'
 
@@ -23,10 +22,6 @@
       { key: 'value', title: 'Value' }
     )
   }
-  headers.value.push({
-    key: 'other_tags',
-    title: 'Other Tags'
-  })
 
   update()
   watch(() => props.ids, () => update())
@@ -55,7 +50,6 @@
             partition: props.partition,
             target
           },
-          other_tags: target,
           value
         }
 
@@ -115,13 +109,6 @@
     </template>
     <template v-slot:item.target="{ value:target }">
       <ContentName :id="target" />
-    </template>
-    <template v-slot:item.other_tags="data">
-      <TagMatch
-        :partition="props.partition"
-        :id="data.value"
-        :ignore="props.ids ? props.ids : [props.id]"
-      />
     </template>
     <template v-slot:item.value="data">
       <pre>{{ data.value }}</pre>
