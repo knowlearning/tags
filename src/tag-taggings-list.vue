@@ -6,6 +6,7 @@
       :tag="tag"
       :depth="props.depth"
       :partition="props.partition"
+      :selected="props.selected"
       @select="tag => emit('select', tag)"
     />
   </v-list>
@@ -19,6 +20,7 @@
   const props = defineProps({
     tags: Array,
     partition: String,
+    selected: Array,
     depth: {
       type: Number,
       default: 0

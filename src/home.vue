@@ -10,11 +10,11 @@
   const route = useRoute()
   const props = defineProps({ partition: String })
 
-  const selectedTags = ref([])
+  const availableTags = ref([])
   const newTagName = ref('')
   const fetchingTags = ref(false)
 
-  const matchingTagIds = computed(() => selectedTagIndexes.value.map(index => selectedTags.value[index]).filter(v => v))
+  const selectedTagIds = computed(() => selectedTagIndexes.value.map(index => availableTags.value[index]).filter(v => v))
 
   Agent
     .query(
@@ -23,17 +23,17 @@
     )
     .then(r => {
       console.log('TOP LEVEL TAGS', r)
-      selectedTags.value = r.map(({ tag }) => tag)
-      availableTags
+      availableTags.value = r.map(({ tag }) => tag)
+      extraQueryTags
         .value
         .forEach(id => {
           if (!r.find(({ tag }) => tag === id)) {
-            selectedTags.value.push(id)
+            availableTags.value.push(id)
           }
         })
     })
 
-  const availableTags = computed(() => {
+  const extraQueryTags = computed(() => {
     const { tags } = route.query
     if (Array.isArray(tags)) return tags
     else if (tags) return [tags]
@@ -42,10 +42,10 @@
 
   const selectedTagIndexes = computed({
     get() {
-      return availableTags.value.map(tag => selectedTags.value.findIndex(t => tag === t))
+      return extraQueryTags.value.map(tag => availableTags.value.findIndex(t => tag === t))
     },
     set(value) {
-      const tags = value.map(index => selectedTags.value[index]).filter(v => v)
+      const tags = value.map(index => availableTags.value[index]).filter(v => v)
       router.push({
         name: route.name,
         params: route.params,
@@ -60,20 +60,20 @@
       active: { name, description: 'A new tag' }
     })
     newTagName.value = ''
-    selectedTags.value.push(id)
+    availableTags.value.push(id)
     selectSingleTag(id)
   }
 
   function selectSingleTag(tag) {
-    selectedTagIndexes.value = [selectedTags.value.findIndex(t => tag === t)]
+    selectedTagIndexes.value = [availableTags.value.findIndex(t => tag === t)]
   }
 
   function addTagToSelection(tag) {
-    let tagCountIndex = selectedTags.value.findIndex(t => t === tag)
+    let tagCountIndex = availableTags.value.findIndex(t => t === tag)
     if (tagCountIndex === -1) {
       //  TODO: actually get tag count
-      selectedTags.value.push(tag)
-      tagCountIndex = selectedTags.value.length - 1
+      availableTags.value.push(tag)
+      tagCountIndex = availableTags.value.length - 1
     }
     if (!selectedTagIndexes.value.includes(tagCountIndex)) {
       selectedTagIndexes.value = [...selectedTagIndexes.value, tagCountIndex]
@@ -81,12 +81,12 @@
   }
 
   function removeTagFromSelection(tag) {
-    const index = selectedTags.value.findIndex(t => t === tag)
-    if (index > -1) {
-      selectedTagIndexes.value = [
-        ...[...selectedTagIndexes.value].splice(index, 1)
-      ]
-    }
+    const tags = selectedTagIds.value.filter(t => t !== tag)
+    router.push({
+      name: route.name,
+      params: route.params,
+      query: { ...route.query, tags }
+    })
   }
 </script>
 
@@ -99,14 +99,14 @@
         multiple
       >
         <TopLevelTagChip
-          v-for="tag in selectedTags"
+          v-for="tag in availableTags"
           :key="tag"
           :tag="tag"
           :partition="props.partition"
-          :selected="matchingTagIds"
+          :selected="selectedTagIds"
           @dblclick="selectSingleTag(tag)"
           @select="tag => {
-            if (matchingTagIds.includes(tag)) {
+            if (selectedTagIds.includes(tag)) {
               removeTagFromSelection(tag)
             }
             else addTagToSelection(tag)
@@ -148,22 +148,22 @@
         </template>
       </v-dialog>
     </div>
-    <div v-if="matchingTagIds.length === 0">
+    <div v-if="selectedTagIds.length === 0">
       Select tags above to filter by
     </div>
-    <div v-else-if="matchingTagIds.length === 1">
+    <div v-else-if="selectedTagIds.length === 1">
       <TagViewer
-        :key="matchingTagIds.join(',')"
+        :key="selectedTagIds.join(',')"
         :partition="props.partition"
-        :tag="matchingTagIds[0]"
+        :tag="selectedTagIds[0]"
       />
     </div>
     <div v-else>
       <div class="text-h3 mb-4 mt-4">Taggings</div>
       <TagMatches
-        :key="matchingTagIds.join(',')"
+        :key="selectedTagIds.join(',')"
         :partition="props.partition"
-        :ids="matchingTagIds"
+        :ids="selectedTagIds"
       />
     </div>
   </v-container>

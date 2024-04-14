@@ -1,8 +1,9 @@
 <template>
-  <v-list-item
-    @click.stop.prevent="emit('select', props.tag)"
-  >
+  <v-list-item @click.stop.prevent="emit('select', props.tag)">
     <template v-slot:prepend>
+      <v-icon
+        :icon="`fa-regular fa-square${selected.includes(props.tag)  ? '-check' : ''}`"
+      />
       <span :style="`display: block; width: ${depth * 32}px`" />
     </template>
     <v-list-item-title
@@ -25,6 +26,7 @@
     v-if="open"
     :tags="childTags"
     :partition="props.partition"
+    :selected="props.selected"
     :depth="props.depth + 1"
     @select="tag => emit('select', tag)"
   />
@@ -40,6 +42,7 @@
   const props = defineProps({
     tag: String,
     partition: String,
+    selected: Array,
     depth: {
       type: Number,
       default: 0

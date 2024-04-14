@@ -34,6 +34,7 @@
           <TagTaggingsList
             :tags="childTags"
             :partition="props.partition"
+            :selected="props.selected"
             @select="tag => emit('select', tag)"
           />
         </v-menu>
@@ -47,7 +48,7 @@
   import TagTaggingsList from './tag-taggings-list.vue'
 
   const emit = defineEmits(['select'])
-  const props = defineProps(['partition', 'tag'])
+  const props = defineProps(['partition', 'tag', 'selected'])
   const myTags = ref(null)
   const childTags = ref([])
 
