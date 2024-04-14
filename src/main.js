@@ -52,6 +52,13 @@ router
     window.document.title = partition ? `Tags | ${partition}` : 'Tags'
   })
 
+Agent
+  .state('user-info')
+  .then(async state => {
+    const { auth: { info } } = await Agent.environment()
+    Object.assign(state, info)
+  })
+
 
 createApp(App)
   .use(router)

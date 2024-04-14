@@ -3,6 +3,7 @@
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import TagMatch from './tag-match.vue'
   import TagContributor from './tag-contributor.vue'
+  import ContentName from './content-name.vue'
 
   const props = defineProps({ partition: String, id: String, ids: Array })
   const emit = defineEmits(['untag'])
@@ -111,6 +112,9 @@
         :partition="partition"
         :target="target"
       />
+    </template>
+    <template v-slot:item.target="{ value:target }">
+      <ContentName :id="target" />
     </template>
     <template v-slot:item.other_tags="data">
       <TagMatch

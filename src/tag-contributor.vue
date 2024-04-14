@@ -8,13 +8,17 @@
     target: String
   })
 
-  const contributor = ref(null)
+  const contributorId = ref(null)
   const loading = ref(true)
+  const contributorInfo = ref(null)
 
   Agent
     .query('tagging-contributor', [partition, tag, target])
-    .then(response => {
-      contributor.value = response[0]?.contributor || null
+    .then(async response => {
+      contributorId.value = response[0]?.contributor
+      if (contributorId.value) {
+        contributorInfo.value = await Agent.state('user-info', contributorId.value)
+      }
       loading.value = false
     })
 
@@ -26,11 +30,18 @@
     indeterminate
   />
   <v-chip
-    v-else-if="contributor"
+    v-else-if="contributorInfo"
     class="mr-2 mt-1 mb-1"
-    size="small"
+    draggable
+    @dragstart="$event.dataTransfer.setData('text', contributorId)"
   >
-    {{ contributor }}
+    <v-avatar
+      class="mr-2"
+      style="margin-left: -8px"
+    >
+      <v-img :src="contributorInfo.picture" />
+    </v-avatar>
+    {{ contributorInfo.name }}
   </v-chip>
   <span v-else> - </span>
 </template>
