@@ -38,6 +38,10 @@
         :path="['name', 'source_string']"
       />
     </v-chip>
+    <UserChip
+      v-else-if="type.startsWith('application/json;type=user')"
+      :id="props.id"
+    />
     <span v-else>
       {{ type }}
       {{ props.id }}
@@ -48,6 +52,7 @@
 <script setup>
   import { ref } from 'vue'
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
+  import UserChip from './user-chip.vue'
 
   const props = defineProps({ id: String })
 

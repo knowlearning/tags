@@ -34,7 +34,6 @@
     v-else
     v-for="{ tag } in matches"
     class="mr-2 mt-1 mb-1"
-    size="small"
     @click="() => {
       router.push({
         name: route.name,
