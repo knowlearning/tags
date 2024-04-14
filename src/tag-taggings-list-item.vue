@@ -1,10 +1,10 @@
 <template>
   <v-list-item @click.stop.prevent="emit('select', props.tag)">
     <template v-slot:prepend>
+      <span :style="`display: block; width: ${depth * 48}px`" />
       <v-icon
         :icon="`fa-regular fa-square${selected.includes(props.tag)  ? '-check' : ''}`"
       />
-      <span :style="`display: block; width: ${depth * 32}px`" />
     </template>
     <v-list-item-title
       draggable
