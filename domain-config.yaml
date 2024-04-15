@@ -92,18 +92,25 @@ postgres:
         WHERE partition = $1
           AND tag = $2
           AND value IS NOT NULL
-    taggings-targeting-tags: |
-      SELECT
-        taggings.id AS tagging,
-        target,
-        contributor,
-        value
-      FROM taggings
-      JOIN metadata ON metadata.id = taggings.target
-      WHERE partition = $1
-        AND tag = $2
-        AND value IS NOT NULL
-        AND metadata.active_type = 'application/json;type=tag-type'
+    taggings-targeting-tags:
+      domains:
+      - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
+      - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
+      - matching-customizer-reference.netlify.app
+      - thailand.pilaproject.org
+      - app.pilaproject.org
+      body: |
+        SELECT
+          taggings.id AS tagging,
+          target,
+          contributor,
+          value
+        FROM taggings
+        JOIN metadata ON metadata.id = taggings.target
+        WHERE partition = $1
+          AND tag = $2
+          AND value IS NOT NULL
+          AND metadata.active_type = 'application/json;type=tag-type'
     top-level-tags: |
       WITH RECURSIVE roots AS (
           -- Identify root tags that are not targeted by any other tags
