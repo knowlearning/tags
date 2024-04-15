@@ -47,28 +47,7 @@ postgres:
       - name: requestedScope
         type: TEXT
   scopes:
-    tags: SELECT * FROM tag_types
-    my-tags: |
-      SELECT
-        metadata.id as id,
-        tag_types.name as name,
-        description
-      FROM tag_types
-      LEFT JOIN metadata
-        ON metadata.id = tag_types.id
-      WHERE metadata.owner = $REQUESTER
-        AND archived IS NOT true
-    my-archived-tags: |
-      SELECT
-        metadata.id as id,
-        tag_types.name as name,
-        description
-      FROM tag_types
-      LEFT JOIN metadata
-        ON metadata.id = tag_types.id
-      WHERE metadata.owner = $REQUESTER
-        AND archived IS TRUE
-    search: |
+    search-tags: |
       SELECT *
       FROM tag_types
       WHERE to_tsvector('english', name) @@ plainto_tsquery('english', $1)
@@ -104,14 +83,6 @@ postgres:
         AND tag = $2
         AND value IS NOT NULL
         AND metadata.active_type = 'application/json;type=tag-type'
-    tags-with-tagging-counts: |
-      SELECT
-        tag,
-        COUNT(target) AS count
-      FROM taggings
-      WHERE partition = $1
-        AND value IS NOT NULL
-      GROUP BY tag
     top-level-tags: |
       WITH RECURSIVE roots AS (
           -- Identify root tags that are not targeted by any other tags
