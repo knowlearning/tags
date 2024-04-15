@@ -46,31 +46,52 @@ postgres:
         type: TEXT
       - name: requestedScope
         type: TEXT
-  scopes:
-    search-tags: |
-      SELECT *
-      FROM tag_types
-      WHERE to_tsvector('english', name) @@ plainto_tsquery('english', $1)
-         OR to_tsvector('english', description) @@ plainto_tsquery('english', $1)
-    taggings-intersection: |
-      SELECT
-        target
-      FROM taggings
-      WHERE partition = $1
-        AND tag = ANY($2)
-        AND value IS NOT NULL
-      GROUP BY target, partition
-      HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($2, 1)
-    taggings-for-tag: |
-      SELECT
-        id AS tagging,
-        target,
-        contributor,
-        value
-      FROM taggings
-      WHERE partition = $1
-        AND tag = $2
-        AND value IS NOT NULL
+  queries:
+    search-tags:
+      domains:
+      - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
+      - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
+      - matching-customizer-reference.netlify.app
+      - thailand.pilaproject.org
+      - app.pilaproject.org
+      body: |
+        SELECT *
+        FROM tag_types
+        WHERE to_tsvector('english', name) @@ plainto_tsquery('english', $1)
+           OR to_tsvector('english', description) @@ plainto_tsquery('english', $1)
+    taggings-intersection:
+      domains:
+      - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
+      - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
+      - matching-customizer-reference.netlify.app
+      - thailand.pilaproject.org
+      - app.pilaproject.org
+      body: |
+        SELECT
+          target
+        FROM taggings
+        WHERE partition = $1
+          AND tag = ANY($2)
+          AND value IS NOT NULL
+        GROUP BY target, partition
+        HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($2, 1)
+    taggings-for-tag:
+      domains:
+      - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
+      - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
+      - matching-customizer-reference.netlify.app
+      - thailand.pilaproject.org
+      - app.pilaproject.org
+      body: |
+        SELECT
+          id AS tagging,
+          target,
+          contributor,
+          value
+        FROM taggings
+        WHERE partition = $1
+          AND tag = $2
+          AND value IS NOT NULL
     taggings-targeting-tags: |
       SELECT
         taggings.id AS tagging,
@@ -140,64 +161,6 @@ postgres:
       WHERE partition = $1
         AND tag = $2
         AND target = $3
-    tagging-for-target: |
-      SELECT value
-      FROM taggings
-      WHERE partition = $1
-        AND tag = $2
-        AND target = $3
-        AND value IS NOT NULL
-    taggings-for-target: |
-      SELECT
-        tag,
-        value
-      FROM taggings
-      WHERE partition = $1
-        AND target = $2
-        AND value IS NOT NULL
-  crossDomainQueries:
-    search-tags:
-      domains:
-      - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
-      - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
-      - matching-customizer-reference.netlify.app
-      - thailand.pilaproject.org
-      - app.pilaproject.org
-      body: |
-        SELECT *
-        FROM tag_types
-        WHERE to_tsvector('english', name) @@ plainto_tsquery('english', $1)
-           OR to_tsvector('english', description) @@ plainto_tsquery('english', $1)
-    taggings-for-tag:
-      domains:
-      - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
-      - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
-      - matching-customizer-reference.netlify.app
-      - thailand.pilaproject.org
-      - app.pilaproject.org
-      body: |
-        SELECT
-          id AS tagging,
-          target,
-          contributor,
-          value
-        FROM taggings
-        WHERE partition = $1
-          AND tag = $2
-          AND value IS NOT NULL
-    taggings-for-target:
-      domains:
-      - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
-      - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
-      - matching-customizer-reference.netlify.app
-      - thailand.pilaproject.org
-      - app.pilaproject.org
-      body: |
-        SELECT DISTINCT tag
-        FROM taggings
-        WHERE partition = $1
-          AND target = $2
-          AND value IS NOT NULL
     tagging-for-target:
       domains:
       - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
@@ -212,7 +175,7 @@ postgres:
           AND tag = $2
           AND target = $3
           AND value IS NOT NULL
-    taggings-intersection:
+    taggings-for-target:
       domains:
       - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
@@ -221,14 +184,12 @@ postgres:
       - app.pilaproject.org
       body: |
         SELECT
-          target
+          tag,
+          value
         FROM taggings
         WHERE partition = $1
-          AND tag = ANY($2)
+          AND target = $2
           AND value IS NOT NULL
-        GROUP BY target, partition
-        HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($2, 1)
-
 agent: |
   import Agent from 'npm:@knowlearning/agents/deno.js'
   import * as uuid from "https://deno.land/std@0.207.0/uuid/mod.ts";
