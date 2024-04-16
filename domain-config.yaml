@@ -206,11 +206,10 @@ postgres:
       - app.pilaproject.org
       body: |
         WITH RECURSIVE AncestorPath AS (
-            SELECT t.id AS target_tag, tg.tag, tg.target, 1 AS depth, ARRAY[tg.tag, t.id] AS path
-            FROM tag_types t
-            JOIN taggings tg ON t.id = tg.target
+            SELECT tg.target AS target_tag, tg.tag, tg.target, 1 AS depth, ARRAY[tg.tag] AS path
+            FROM taggings tg
             WHERE tg.partition = $1
-              AND t.id = $2
+              AND tg.target = $2
               AND tg.value IS NOT NULL
 
             UNION ALL
