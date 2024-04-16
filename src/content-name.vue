@@ -38,6 +38,23 @@
         :path="['name', 'source_string']"
       />
     </v-chip>
+    <v-chip
+      v-else-if="type.startsWith('application/json;type=sequence')"
+      draggable
+      @dragstart="$event.dataTransfer.setData('text', props.id)"
+    >
+      <template v-slot:prepend>
+        <img
+          :src="typeIconSrc"
+          class="mr-2"
+          style="width: 21px;"
+        />
+      </template>
+      <vueScopeComponent
+        :id="props.id"
+        :path="['name']"
+      />
+    </v-chip>
     <UserChip
       v-else-if="type.startsWith('application/json;type=user')"
       :id="props.id"
