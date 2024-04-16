@@ -82,6 +82,7 @@ postgres:
       - matching-customizer-reference.netlify.app
       - thailand.pilaproject.org
       - app.pilaproject.org
+      - create.pilaproject.org
       body: |
         SELECT
           id AS tagging,
