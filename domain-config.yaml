@@ -221,7 +221,7 @@ postgres:
               AND tg.partition = $1
         ),
         CompletePaths AS (
-            SELECT ap.*
+            SELECT path
             FROM AncestorPath ap
             WHERE NOT EXISTS (
                 SELECT 1
