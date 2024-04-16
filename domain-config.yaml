@@ -197,6 +197,40 @@ postgres:
         WHERE partition = $1
           AND target = $2
           AND value IS NOT NULL
+    tag-ancestor-path:
+      domains:
+      - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
+      - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
+      - create.pilaproject.org
+      - thailand.pilaproject.org
+      - app.pilaproject.org
+      body: |
+        WITH RECURSIVE AncestorPath AS (
+            SELECT t.id AS target_tag, tg.tag, tg.target, 1 AS depth, ARRAY[tg.tag, t.id] AS path
+            FROM tag_types t
+            JOIN taggings tg ON t.id = tg.target
+            WHERE tg.partition = $1
+              AND t.id = $2
+
+            UNION ALL
+
+            SELECT ap.target_tag, tg.tag, tg.target, ap.depth + 1, ARRAY[tg.tag] || ap.path
+            FROM AncestorPath ap
+            JOIN taggings tg ON ap.tag = tg.target
+            WHERE NOT tg.tag = ANY(ap.path)
+              AND tg.partition = $1
+        ),
+        CompletePaths AS (
+            SELECT ap.*
+            FROM AncestorPath ap
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM AncestorPath other
+                WHERE other.path @> ap.path AND other.path <> ap.path
+            )
+        )
+        SELECT * FROM CompletePaths
+        ORDER BY array_length(path, 1) DESC
 agent: |
   import Agent from 'npm:@knowlearning/agents/deno.js'
   import * as uuid from "https://deno.land/std@0.207.0/uuid/mod.ts";
