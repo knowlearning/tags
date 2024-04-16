@@ -197,7 +197,7 @@ postgres:
         WHERE partition = $1
           AND target = $2
           AND value IS NOT NULL
-    tag-ancestor-path:
+    tag-ancestor-paths:
       domains:
       - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
@@ -211,6 +211,7 @@ postgres:
             JOIN taggings tg ON t.id = tg.target
             WHERE tg.partition = $1
               AND t.id = $2
+              AND tg.value IS NOT NULL
 
             UNION ALL
 
@@ -219,6 +220,7 @@ postgres:
             JOIN taggings tg ON ap.tag = tg.target
             WHERE NOT tg.tag = ANY(ap.path)
               AND tg.partition = $1
+              AND tg.value IS NOT NULL
         ),
         CompletePaths AS (
             SELECT path

@@ -2,6 +2,7 @@
   import { ref, computed } from 'vue'
   import { useRouter } from 'vue-router'
   import { validate as isUUID } from 'uuid'
+  import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import tagMatches from './tag-matches.vue'
 
   const router = useRouter()
@@ -15,11 +16,18 @@
   const editing = ref(false)
   const myTags = ref(null)
   const newTaggingContent = ref('')
+  const ancestorPaths = ref([])
 
   Agent.state('tags').then(state => myTags.value = state)
   Agent.state(props.tag).then(state => tagType.value = state)
   Agent.metadata(props.tag).then(md => tagTypeMetadata.value = md)
   Agent.environment().then(env => environment.value = env)
+  Agent
+    .query('tag-ancestor-paths', [props.partition, props.tag])
+    .then(r => {
+      console.log('ap', r)
+      ancestorPaths.value = r.map(({ path }) => path)
+    })
 
   const userIsOwner = computed(() => environment.value.auth.user === tagTypeMetadata.value.owner)
 
@@ -72,6 +80,22 @@
       <p>id:{{ props.tag }}</p>
       <p>owner:{{ tagTypeMetadata.owner }}</p>
       <p>{{ tagType.description }}</p>
+      <div
+        v-for="path in ancestorPaths"
+        class="mt-2"
+      >
+        <span v-for="ancestor, index in path">
+          <v-icon
+            v-if="index > 0"
+            icon="fa-solid fa-chevron-right"
+          />
+          <v-chip
+            variant="outlined"
+          >
+            <vueScopeComponent :id="ancestor" :path="['name']" />
+          </v-chip>
+        </span>
+      </div>
       <tagMatches
         :key="lastAdd"
         :partition="props.partition"
