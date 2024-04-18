@@ -3,7 +3,8 @@
   import { useRouter } from 'vue-router'
   import { validate as isUUID } from 'uuid'
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
-  import tagMatches from './tag-matches.vue'
+  import TagMatches from './tag-matches.vue'
+  import AncestorTree from './ancestor-tree.vue'
 
   const router = useRouter()
 
@@ -80,23 +81,10 @@
       <p>id:{{ props.tag }}</p>
       <p>owner:{{ tagTypeMetadata.owner }}</p>
       <p>{{ tagType.description }}</p>
-      <div
-        v-for="path in ancestorPaths"
-        class="mt-2"
-      >
-        <span v-for="ancestor, index in path">
-          <v-icon
-            v-if="index > 0"
-            icon="fa-solid fa-chevron-right"
-          />
-          <v-chip
-            variant="outlined"
-          >
-            <vueScopeComponent :id="ancestor" :path="['name']" />
-          </v-chip>
-        </span>
-      </div>
-      <tagMatches
+      <AncestorTree
+        :paths="ancestorPaths"
+      />
+      <TagMatches
         :key="lastAdd"
         :partition="props.partition"
         :id="props.tag"
