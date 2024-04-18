@@ -4,7 +4,7 @@
       <span
         class="mr-2"
         :style="`
-          width: ${level * 32}px;
+          width: ${level * 48}px;
           display: inline-block;
           text-align: right;
         `">
@@ -12,7 +12,9 @@
       </span>
     </template>
     <v-list-item-title>
-      <vueScopeComponent :id="props.id" :path="['name']" />
+      <v-chip>
+        <vueScopeComponent :id="props.id" :path="['name']" />
+      </v-chip>
       <v-icon
         v-if="node[props.leaf]"
         class="ml-2"
