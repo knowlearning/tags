@@ -17,18 +17,11 @@
   const editing = ref(false)
   const myTags = ref(null)
   const newTaggingContent = ref('')
-  const ancestorPaths = ref([])
 
   Agent.state('tags').then(state => myTags.value = state)
   Agent.state(props.tag).then(state => tagType.value = state)
   Agent.metadata(props.tag).then(md => tagTypeMetadata.value = md)
   Agent.environment().then(env => environment.value = env)
-  Agent
-    .query('tag-ancestor-paths', [props.partition, props.tag])
-    .then(r => {
-      console.log('ap', r)
-      ancestorPaths.value = r.map(({ path }) => path)
-    })
 
   const userIsOwner = computed(() => environment.value.auth.user === tagTypeMetadata.value.owner)
 
@@ -82,7 +75,8 @@
       <p>owner:{{ tagTypeMetadata.owner }}</p>
       <p>{{ tagType.description }}</p>
       <AncestorTree
-        :paths="ancestorPaths"
+        :partition="props.partition"
+        :tag="props.tag"
       />
       <TagMatches
         :key="lastAdd"

@@ -1,29 +1,34 @@
 <template>
-  <v-list-group
-    v-if="hasChildren"
-    no-action
-    :value="true"
-  >
-    <template v-slot:activator>
-      <v-list-item>
-        <v-list-item-title>
-          <vueScopeComponent :id="nodeTitle" :path="['name']" />
-        </v-list-item-title>
-      </v-list-item>
+  <v-list-item>
+    <template v-slot:prepend>
+      <span
+        class="mr-2"
+        :style="`
+          width: ${level * 32}px;
+          display: inline-block;
+          text-align: right;
+        `">
+        <span v-if="level > 0">&#x21B3;</span>
+      </span>
     </template>
-    <v-list-item
-      v-for="(child, name) in node[nodeTitle]"
-      :key="name"
-    >
-      <tree-node :node="child" :level="nextLevel" />
-    </v-list-item>
-  </v-list-group>
-
-  <v-list-item v-else>
     <v-list-item-title>
-      <vueScopeComponent :id="nodeTitle" :path="['name']" />
+      <vueScopeComponent :id="props.id" :path="['name']" />
+      <v-icon
+        v-if="node[props.leaf]"
+        class="ml-2"
+        style="margin-right: -6px"
+        icon="fa-solid fa-tag"
+      />
     </v-list-item-title>
   </v-list-item>
+  <tree-node
+    v-for="(child, id) in nonLeafChildren"
+    :key="id"
+    :id="id"
+    :node="child"
+    :leaf="props.leaf"
+    :level="props.level + 1"
+  />
 </template>
 
 <script setup>
@@ -32,11 +37,16 @@
   import TreeNode from './ancestor-tree-node.vue'
 
   const props = defineProps({
+    id: String,
     node: Object,
+    leaf: String,
     level: Number
-  });
+  })
 
-  const nodeTitle = computed(() => Object.keys(props.node)[0] || 'Node');
-  const hasChildren = computed(() => Object.keys(props.node[nodeTitle.value] || {}).length > 0);
-  const nextLevel = computed(() => props.level + 1);
+  const nonLeafChildren = computed(() => {
+    const copy = {...props.node }
+    delete copy[props.leaf]
+    return copy
+  })
+
 </script>
