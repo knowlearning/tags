@@ -16,7 +16,7 @@
         <vueScopeComponent :id="props.id" :path="['name']" />
       </v-chip>
       <v-icon
-        v-if="node[props.leaf]"
+        v-if="node[props.target]"
         class="ml-2"
         style="margin-right: -6px"
         icon="fa-solid fa-tag"
@@ -28,7 +28,7 @@
     :key="id"
     :id="id"
     :node="child"
-    :leaf="props.leaf"
+    :target="props.target"
     :level="props.level + 1"
   />
 </template>
@@ -36,18 +36,18 @@
 <script setup>
   import { computed, defineProps } from 'vue'
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
-  import TreeNode from './ancestor-tree-node.vue'
+  import TreeNode from './tag-ancestor-tree-node.vue'
 
   const props = defineProps({
     id: String,
     node: Object,
-    leaf: String,
+    target: String,
     level: Number
   })
 
   const nonLeafChildren = computed(() => {
     const copy = {...props.node }
-    delete copy[props.leaf]
+    delete copy[props.target]
     return copy
   })
 

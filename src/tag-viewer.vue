@@ -4,7 +4,7 @@
   import { validate as isUUID } from 'uuid'
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import TagMatches from './tag-matches.vue'
-  import AncestorTree from './ancestor-tree.vue'
+  import AncestorTree from './tag-ancestor-tree.vue'
 
   const router = useRouter()
 
@@ -76,7 +76,7 @@
       <p>{{ tagType.description }}</p>
       <AncestorTree
         :partition="props.partition"
-        :tag="props.tag"
+        :target="props.tag"
       />
       <TagMatches
         :key="lastAdd"

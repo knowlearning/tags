@@ -5,7 +5,7 @@
         v-for="(node, id) in tree"
         :key="id"
         :id="id"
-        :leaf="props.tag"
+        :target="props.target"
         :node="node"
         :level="0"
       />
@@ -16,18 +16,18 @@
 <script setup>
   import { ref, computed } from 'vue'
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
-  import TreeNode from './ancestor-tree-node.vue'
+  import TreeNode from './tag-ancestor-tree-node.vue'
 
-  const props = defineProps({ partition: String, tag: String })
+  const props = defineProps({ partition: String, target: String })
 
   const ancestorPaths = ref([])
 
   Agent
-    .query('tag-ancestor-paths', [props.partition, props.tag])
+    .query('tag-ancestor-paths', [props.partition, props.target])
     .then(r => {
       console.log('ap', r)
       ancestorPaths.value = r.map(
-        ({ path }) => [...path, props.tag] //  add tag to end of each path to render it
+        ({ path }) => [...path, props.target] //  add tag to end of each path to render it
       )
     })
 
