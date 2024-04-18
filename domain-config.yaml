@@ -205,33 +205,45 @@ postgres:
       - thailand.pilaproject.org
       - app.pilaproject.org
       body: |
-        WITH RECURSIVE AncestorPath AS (
-            SELECT tg.target AS target_tag, tg.tag, tg.target, 1 AS depth, ARRAY[tg.tag] AS path
-            FROM taggings tg
-            WHERE tg.partition = $1
-              AND tg.target = $2
-              AND tg.value IS NOT NULL
+        WITH RECURSIVE AncestorPaths AS (
+            -- Anchor member: Initialize with each direct ancestor of the given child
+            SELECT
+                target AS child,
+                tag AS ancestor,
+                ARRAY[tag]::VARCHAR[] AS path  -- Starts the path with the ancestor
+            FROM taggings
+            WHERE partition = $1
+              AND target = $2
+              AND value IS NOT NULL
 
             UNION ALL
 
-            SELECT ap.target_tag, tg.tag, tg.target, ap.depth + 1, ARRAY[tg.tag] || ap.path
-            FROM AncestorPath ap
-            JOIN taggings tg ON ap.tag = tg.target
-            WHERE NOT tg.tag = ANY(ap.path)
-              AND tg.partition = $1
-              AND tg.value IS NOT NULL
+            -- Recursive member: Extend the path by prepending the next ancestor
+            SELECT
+                ap.child,
+                t.tag,
+                t.tag || ap.path  -- Prepends the new ancestor to the current path
+            FROM taggings t
+            INNER JOIN AncestorPaths ap ON t.target = ap.ancestor
+            WHERE partition = $1
+              AND value IS NOT NULL
+              AND NOT t.tag = ANY(ap.path)  -- Prevent cycling by not revisiting any ancestors in the path
         ),
-        CompletePaths AS (
-            SELECT path
-            FROM AncestorPath ap
-            WHERE NOT EXISTS (
-                SELECT 1
-                FROM AncestorPath other
-                WHERE other.path @> ap.path AND other.path <> ap.path
-            )
+        LongestPaths AS (
+            SELECT
+                child,
+                ancestor,
+                path,
+                array_length(path, 1) AS length,
+                first_value(ancestor) OVER (PARTITION BY child ORDER BY array_length(path, 1) DESC) AS root_ancestor
+            FROM AncestorPaths
         )
-        SELECT * FROM CompletePaths
-        ORDER BY array_length(path, 1) DESC
+        SELECT
+            path
+        FROM LongestPaths
+        WHERE root_ancestor = ancestor  -- Ensures this path is the longest starting from its root ancestor
+          AND child = $2
+        ORDER BY length DESC, path
 agent: |
   import Agent from 'npm:@knowlearning/agents/deno.js'
   import * as uuid from "https://deno.land/std@0.207.0/uuid/mod.ts";
