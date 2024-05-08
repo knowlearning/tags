@@ -28,7 +28,6 @@
   }
 
   function removePartition(name) {
-    console.log(partition.value, name)
     if (partition.value === name) partition.value = null
     delete partitionStates.value[name]
   }

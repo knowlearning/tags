@@ -25,7 +25,6 @@
   Agent
     .query('tag-ancestor-paths', [props.partition, props.target])
     .then(r => {
-      console.log('ap', r)
       ancestorPaths.value = r.map(
         ({ path }) => [...path, props.target] //  add tag to end of each path to render it
       )

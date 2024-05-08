@@ -22,7 +22,6 @@
       [props.partition]
     )
     .then(r => {
-      console.log('TOP LEVEL TAGS', r)
       availableTags.value = r.map(({ tag }) => tag)
       extraQueryTags
         .value
