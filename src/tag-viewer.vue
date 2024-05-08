@@ -83,7 +83,11 @@
     <div v-else>
       <div>
         <span class="text-h3">
-          Taggings for "{{ tagType.name }}"
+          <v-icon
+            v-if="tagType.icon"
+            :icon="tagType.icon"
+          />
+          {{ tagType.name }}
         </span>
         <v-btn
           :disabled="!userIsOwner"

@@ -2,6 +2,7 @@
   <v-chip
     class="mr-2"
     draggable
+    variant="outlined"
     :prepend-icon="tag.icon"
     :color="selected.includes(props.tag) ? 'primary' : ''"
     @dragstart="$event.dataTransfer.setData('text', props.tag)"

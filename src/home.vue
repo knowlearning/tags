@@ -116,6 +116,7 @@
       <br/>
       <v-chip
         v-for="tag in selectedTagIds"
+        :key="tag"
         @click:close="toggleTag(tag)"
         color="primary"
         closable
