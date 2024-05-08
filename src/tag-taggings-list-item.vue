@@ -1,9 +1,13 @@
 <template>
-  <v-list-item @click.stop.prevent="emit('select', props.tag)">
+  <v-list-item
+    @click.stop.prevent="emit('select', props.tag)"
+    :active="selected.includes(props.tag)"
+  >
     <template v-slot:prepend>
       <span :style="`display: block; width: ${depth * 48}px`" />
       <v-icon
-        :icon="`fa-regular fa-square${selected.includes(props.tag)  ? '-check' : ''}`"
+        :icon="tag.icon || 'fa-solid fa-ellipsis'"
+        :style="tag.icon ? '' : 'opacity: 0.1'"
       />
     </template>
     <v-list-item-title
@@ -38,6 +42,7 @@
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
 
   const emit = defineEmits(['select'])
+  const tag = ref({})
 
   const props = defineProps({
     tag: String,
@@ -54,6 +59,8 @@
   Agent
     .query('taggings-targeting-tags', [props.partition, props.tag])
     .then(r => childTags.value = r.map(t => t.target))
+
+  Agent.watch(props.tag, ({ state }) => tag.value = state)
 
 </script>
 
