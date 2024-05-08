@@ -2,6 +2,7 @@
   <v-list-item
     @click.stop.prevent="emit('select', props.tag)"
     :active="selected.includes(props.tag)"
+    color="primary"
   >
     <template v-slot:prepend>
       <span :style="`display: block; width: ${depth * 48}px`" />
