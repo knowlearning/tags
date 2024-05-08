@@ -1,7 +1,9 @@
 <template>
   <v-chip
-    variant="outlined"
+    class="mr-2"
     draggable
+    :prepend-icon="tag.icon"
+    :color="selected.includes(props.tag) ? 'primary' : ''"
     @dragstart="$event.dataTransfer.setData('text', props.tag)"
     @drop.prevent="e => handleDrop(e, props.tag)"
     @dragover.prevent
@@ -51,6 +53,7 @@
   const props = defineProps(['partition', 'tag', 'selected'])
   const myTags = ref(null)
   const childTags = ref([])
+  const tag = ref({})
 
   Agent
     .query('taggings-targeting-tags', [props.partition, props.tag])
@@ -59,6 +62,8 @@
   Agent
     .state('tags')
     .then(state => myTags.value = state)
+
+  Agent.watch(props.tag, ({ state }) => tag.value = state)
 
   const open = ref(false)
 

@@ -1,5 +1,6 @@
 <script setup>
   import { ref, reactive, watch, computed } from 'vue'
+  import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import { validate as isUUID } from 'uuid'
   import TagViewer from './tag-viewer.vue'
   import TagMatches from './tag-matches.vue'
@@ -14,44 +15,21 @@
   const newTagName = ref('')
   const fetchingTags = ref(false)
 
-  const selectedTagIds = computed(() => selectedTagIndexes.value.map(index => availableTags.value[index]).filter(v => v))
-
-  Agent
-    .query(
-      'top-level-tags',
-      [props.partition]
-    )
-    .then(r => {
-      availableTags.value = r.map(({ tag }) => tag)
-      extraQueryTags
-        .value
-        .forEach(id => {
-          if (!r.find(({ tag }) => tag === id)) {
-            availableTags.value.push(id)
-          }
-        })
-    })
-
-  const extraQueryTags = computed(() => {
+  const queryTags = computed(() => {
     const { tags } = route.query
     if (Array.isArray(tags)) return tags
     else if (tags) return [tags]
     else return []
   })
 
-  const selectedTagIndexes = computed({
-    get() {
-      return extraQueryTags.value.map(tag => availableTags.value.findIndex(t => tag === t))
-    },
-    set(value) {
-      const tags = value.map(index => availableTags.value[index]).filter(v => v)
-      router.push({
-        name: route.name,
-        params: route.params,
-        query: { ...route.query, tags }
-      })
-    }
-  })
+  const selectedTagIds = reactive([...queryTags.value])
+
+  Agent
+    .query(
+      'top-level-tags',
+      [props.partition]
+    )
+    .then(r => availableTags.value = r.map(({ tag }) => tag))
 
   async function createTag(name) {
     const id = await Agent.create({
@@ -64,27 +42,25 @@
   }
 
   function selectSingleTag(tag) {
-    selectedTagIndexes.value = [availableTags.value.findIndex(t => tag === t)]
+    while (selectedTagIds.length) selectedTagIds.pop()
+    selectedTagIds.push(tag)
+    updateParams()
   }
 
-  function addTagToSelection(tag) {
-    let tagCountIndex = availableTags.value.findIndex(t => t === tag)
-    if (tagCountIndex === -1) {
-      //  TODO: actually get tag count
-      availableTags.value.push(tag)
-      tagCountIndex = availableTags.value.length - 1
-    }
-    if (!selectedTagIndexes.value.includes(tagCountIndex)) {
-      selectedTagIndexes.value = [...selectedTagIndexes.value, tagCountIndex]
-    }
+  function toggleTag(tag) {
+    const index = selectedTagIds.findIndex(id => id === tag)
+
+    if (index > -1) selectedTagIds.splice(index, 1)
+    else selectedTagIds.push(tag)
+
+    updateParams()
   }
 
-  function removeTagFromSelection(tag) {
-    const tags = selectedTagIds.value.filter(t => t !== tag)
+  function updateParams() {
     router.push({
       name: route.name,
       params: route.params,
-      query: { ...route.query, tags }
+      query: { ...route.query, tags: selectedTagIds }
     })
   }
 </script>
@@ -92,26 +68,16 @@
 <template>
   <v-container>
     <div>
-      <v-chip-group
-        v-model="selectedTagIndexes"
-        column
-        multiple
-      >
-        <TopLevelTagChip
-          v-for="tag in availableTags"
-          :key="tag"
-          :tag="tag"
-          :partition="props.partition"
-          :selected="selectedTagIds"
-          @dblclick="selectSingleTag(tag)"
-          @select="tag => {
-            if (selectedTagIds.includes(tag)) {
-              removeTagFromSelection(tag)
-            }
-            else addTagToSelection(tag)
-          }"
-        />
-      </v-chip-group>
+      <TopLevelTagChip
+        v-for="tag in availableTags"
+        :key="tag"
+        :tag="tag"
+        :partition="props.partition"
+        :selected="selectedTagIds"
+        @click="toggleTag(tag)"
+        @dblclick="selectSingleTag(tag)"
+        @select="toggleTag"
+      />
       <v-dialog max-width="500">
         <template v-slot:activator="{ props: activatorProps }">
           <v-chip v-bind="activatorProps">+ Create Tag</v-chip>
@@ -146,6 +112,16 @@
           </v-card>
         </template>
       </v-dialog>
+      <br/>
+      <br/>
+      <v-chip
+        v-for="tag in selectedTagIds"
+        @click:close="toggleTag(tag)"
+        color="primary"
+        closable
+      >
+        <vueScopeComponent :id="tag" :path="['name']" />
+      </v-chip>
     </div>
     <div v-if="selectedTagIds.length === 0">
       Select tags above to filter by
