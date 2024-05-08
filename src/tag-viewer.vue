@@ -49,27 +49,46 @@
 <template>
   <div v-if="tagType && tagTypeMetadata && environment">
     <div v-if="userIsOwner && editing">
-      <input v-model="tagType.name" />
-      <textarea v-model="tagType.description"></textarea>
-      <button @click="editing = false">save</button>
-      <button
+      <v-text-field
+        v-model="tagType.name"
+        label="Name"
+        placeholder="Enter Tag Name"
+      />
+      <v-textarea
+        v-model="tagType.description"
+        label="Description"
+        placeholder="Enter Tag Description"
+      />
+      <v-text-field
+        v-model="tagType.icon"
+        :prepend-icon="tagType.icon"
+        label="Icon"
+        placeholder="Enter Icon Reference"
+      />
+      <v-btn @click="editing = false">Done</v-btn>
+      <v-btn
         v-if="tagType.archived"
         @click="delete tagType.archived"
-      >unarchive</button>
-      <button
+        label="unarchive"
+      >
+        unarchive
+      </v-btn>
+      <v-btn
         v-else
         @click="tagType.archived = true"
-      >archive</button>
+      >
+        archive
+      </v-btn>
     </div>
     <div v-else>
       <div>
         <span class="text-h3">
           Taggings for "{{ tagType.name }}"
         </span>
-        <button
+        <v-btn
           :disabled="!userIsOwner"
           @click="editing = true"
-        >Edit</button>
+        >Edit</v-btn>
       </div>
       <p>id:{{ props.tag }}</p>
       <p>owner:{{ tagTypeMetadata.owner }}</p>
