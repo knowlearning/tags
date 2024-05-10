@@ -1,6 +1,6 @@
 <template>
   <v-chip
-    class="mr-2"
+    class="mr-2 mb-2"
     draggable
     variant="outlined"
     :prepend-icon="tag.icon"

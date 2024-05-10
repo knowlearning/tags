@@ -114,9 +114,13 @@
       </v-dialog>
       <br/>
       <br/>
+      <h3 v-if="selectedTagIds.length">
+        Active Tag Filter{{ selectedTagIds.length > 1 ? 's' : '' }}:
+      </h3>
       <v-chip
         v-for="tag in selectedTagIds"
         :key="tag"
+        class="mr-2 mb-2"
         @click:close="toggleTag(tag)"
         color="primary"
         closable

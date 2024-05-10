@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-  import { computed, defineProps } from 'vue'
+  import { computed } from 'vue'
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import TreeNode from './tag-ancestor-tree-node.vue'
 
