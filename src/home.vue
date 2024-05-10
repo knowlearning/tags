@@ -114,21 +114,26 @@
       </v-dialog>
       <br/>
       <br/>
-      <h3 v-if="selectedTagIds.length">
-        Active Tag Filter{{ selectedTagIds.length > 1 ? 's' : '' }}:
-      </h3>
-      <v-chip
-        v-for="tag in selectedTagIds"
-        :key="tag"
-        class="mr-2 mb-2"
-        @click:close="toggleTag(tag)"
-        draggable
-        @dragstart="$event.dataTransfer.setData('text', tag)"
-        color="primary"
-        closable
+      <div
+        class="active-filters mb-4"
+        v-if="selectedTagIds.length"
       >
-        <vueScopeComponent :id="tag" :path="['name']" />
-      </v-chip>
+        <h3>
+          Active Tag Filter{{ selectedTagIds.length > 1 ? 's' : '' }}:
+        </h3>
+        <v-chip
+          v-for="tag in selectedTagIds"
+          :key="tag"
+          class="mr-2 mb-2"
+          @click:close="toggleTag(tag)"
+          draggable
+          @dragstart="$event.dataTransfer.setData('text', tag)"
+          color="primary"
+          closable
+        >
+          <vueScopeComponent :id="tag" :path="['name']" />
+        </v-chip>
+      </div>
     </div>
     <div v-if="selectedTagIds.length === 0">
       Select tags above to filter by
@@ -152,4 +157,7 @@
 </template>
 
 <style scoped>
+  .active-filters {
+    text-align: center;
+  }
 </style>

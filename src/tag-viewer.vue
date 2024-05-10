@@ -5,6 +5,7 @@
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import TagMatches from './tag-matches.vue'
   import AncestorTree from './tag-ancestor-tree.vue'
+  import UserChip from './user-chip.vue'
 
   const router = useRouter()
 
@@ -83,10 +84,6 @@
     <div v-else>
       <div>
         <span class="text-h3">
-          <v-icon
-            v-if="tagType.icon"
-            :icon="tagType.icon"
-          />
           {{ tagType.name }}
         </span>
         <v-btn
@@ -94,8 +91,16 @@
           @click="editing = true"
         >Edit</v-btn>
       </div>
-      <p>id:{{ props.tag }}</p>
-      <p>owner:{{ tagTypeMetadata.owner }}</p>
+      <h3>ID</h3>
+      <p>{{ props.tag }}</p>
+      <h3 v-if="tagType.icon">Icon</h3>
+      <v-icon
+        v-if="tagType.icon"
+        :icon="tagType.icon"
+      />
+      <h3>Owner</h3>
+      <p><UserChip :id="tagTypeMetadata.owner" /></p>
+      <h3>Description</h3>
       <p>{{ tagType.description }}</p>
       <AncestorTree
         :partition="props.partition"
