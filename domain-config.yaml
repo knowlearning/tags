@@ -121,6 +121,7 @@ postgres:
               FROM taggings
               WHERE tag_types.id = target
                 AND taggings.partition = $1
+                AND taggings.target != taggings.tag
                 AND taggings.value IS NOT NULL
           ) AND EXISTS (
               SELECT 1

@@ -122,6 +122,8 @@
         :key="tag"
         class="mr-2 mb-2"
         @click:close="toggleTag(tag)"
+        draggable
+        @dragstart="$event.dataTransfer.setData('text', tag)"
         color="primary"
         closable
       >
