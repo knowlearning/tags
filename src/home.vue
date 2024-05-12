@@ -4,7 +4,7 @@
   import TagViewer from './tag-viewer.vue'
   import TagMatches from './tag-matches.vue'
   import { useRouter, useRoute } from 'vue-router'
-  import TagFilters from './filters/index.vue'
+  import { Filters as TagFilters } from '@knowlearning/tags'
 
   const router = useRouter()
   const route = useRoute()
