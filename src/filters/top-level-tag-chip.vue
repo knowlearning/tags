@@ -51,22 +51,28 @@
   import TagTaggingsList from './tag-taggings-list.vue'
 
   const emit = defineEmits(['select'])
-  const props = defineProps(['partition', 'tag', 'selected'])
+  const props = defineProps(['partition', 'tag', 'selected', 'leaf-selection-only'])
   const myTags = ref(null)
   const childTags = ref([])
   const tag = ref({})
 
   Agent
-    .query('taggings-targeting-tags', [props.partition, props.tag])
-    .then(r => childTags.value = r.map(t => t.target))
-
-  Agent
     .state('tags')
     .then(state => myTags.value = state)
 
-  Agent.watch(props.tag, ({ state }) => tag.value = state)
+  Agent
+    .watch(props.tag, ({ state }) => {
+      tag.value = state
+      updateChildTags()
+    })
 
   const open = ref(false)
+
+  function updateChildTags() {
+    Agent
+      .query('taggings-targeting-tags', [props.partition, props.tag])
+      .then(r => childTags.value = r.map(t => t.target))
+  }
 
   function handleDrop(event) {
     const target = event.dataTransfer.getData('text')

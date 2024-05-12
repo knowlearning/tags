@@ -3,6 +3,7 @@
 
     <div>
       <TopLevelTagChip
+        :leaf-selection-only="props['leaf-selection-only']"
         v-for="tag in props.roots"
         :key="tag"
         :tag="tag"
@@ -57,7 +58,11 @@
         <v-chip
           v-for="tag in modelValue"
           :key="tag"
-          class="mr-2 mb-2"
+          :class="{
+            'mr-2': true,
+            'mb-2': true,
+            bounce: bounced[tag]
+          }"
           @click:close="removeTag(tag)"
           draggable
           @dragstart="$event.dataTransfer.setData('text', tag)"
@@ -76,11 +81,15 @@
 </template>
 
 <script setup>
-  import { ref, watch } from 'vue'
+  import { ref, reactive, watch } from 'vue'
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import TopLevelTagChip from './top-level-tag-chip.vue'
 
   const props = defineProps({
+    'leaf-selection-only': {
+      type: Boolean,
+      default: false
+    },
     partition: String,
     roots: Array,
     modelValue: {
@@ -93,6 +102,7 @@
 
   const newTagName = ref('')
   const internalItems = ref([...props.modelValue])
+  const bounced = reactive({})
 
   watch(
     () => props.modelValue,
@@ -100,7 +110,13 @@
     { deep: true }
   )
 
+  function bounceSelectedTag(tag) {
+    bounced[tag] = false
+    setTimeout(() => bounced[tag] = true)
+  }
+
   function select(tag) {
+    bounceSelectedTag(tag)
     if (!internalItems.value.includes(tag)) {
       internalItems.value.push(tag)
       emit('update:modelValue', [...internalItems.value])
@@ -126,6 +142,7 @@
   }
 
   function selectSingleTag(tag) {
+    bounceSelectedTag(tag)
     internalItems.value = [tag]
     emit('update:modelValue', [...internalItems.value])
   }
@@ -134,5 +151,19 @@
 <style scoped>
   .active-filters {
     text-align: center;
+  }
+  .bounce {
+    animation: bounce-in 0.3s;
+  }
+  @keyframes bounce-in {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.25);
+    }
+    100% {
+      transform: scale(1);
+    }
   }
 </style>

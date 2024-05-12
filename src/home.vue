@@ -4,7 +4,7 @@
   import TagViewer from './tag-viewer.vue'
   import TagMatches from './tag-matches.vue'
   import { useRouter, useRoute } from 'vue-router'
-  import TagFilters from './tag-filters.vue'
+  import TagFilters from './filters/index.vue'
 
   const router = useRouter()
   const route = useRoute()
@@ -42,6 +42,7 @@
 <template>
   <v-container>
     <TagFilters
+      leaf-selection-only
       :partition="props.partition"
       :roots="availableTags"
       v-model="selectedTagIds"
@@ -53,7 +54,7 @@
         :tag="selectedTagIds[0]"
       />
     </div>
-    <div v-else>
+    <div v-else-if="selectedTagIds.length > 1">
       <div class="text-h3 mb-4 mt-4">Taggings</div>
       <TagMatches
         :key="selectedTagIds.join(',')"
