@@ -43,6 +43,7 @@
   <v-container>
     <TagFilters
       leaf-selection-only
+      editable
       :partition="props.partition"
       :roots="availableTags"
       v-model="selectedTagIds"

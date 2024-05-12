@@ -12,7 +12,10 @@
         @click="select(tag)"
         @select="select"
       />
-      <v-dialog max-width="500">
+      <v-dialog
+        max-width="500"
+        v-if="props.editable"
+      >
         <template v-slot:activator="{ props: activatorProps }">
           <v-chip v-bind="activatorProps">+ Create Tag</v-chip>
         </template>
@@ -87,6 +90,10 @@
 
   const props = defineProps({
     'leaf-selection-only': {
+      type: Boolean,
+      default: false
+    },
+    editable: {
       type: Boolean,
       default: false
     },
