@@ -3,13 +3,12 @@
 
     <div>
       <TopLevelTagChip
-        :leaf-selection-only="props['leaf-selection-only']"
+        :selectLeavesOnly="props.selectLeavesOnly"
         v-for="tag in props.roots"
         :key="tag"
         :tag="tag"
         :partition="props.partition"
         :selected="modelValue"
-        @click="select(tag)"
         @select="select"
       />
       <v-dialog
@@ -89,7 +88,7 @@
   import TopLevelTagChip from './top-level-tag-chip.vue'
 
   const props = defineProps({
-    'leaf-selection-only': {
+    selectLeavesOnly: {
       type: Boolean,
       default: false
     },

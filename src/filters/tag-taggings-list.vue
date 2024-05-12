@@ -8,6 +8,7 @@
       :partition="props.partition"
       :selected="props.selected"
       @select="tag => emit('select', tag)"
+      :select-leaves-only="props.selectLeavesOnly"
     />
   </v-list>
 </template>
@@ -18,6 +19,7 @@
 
   const emit = defineEmits(['select'])
   const props = defineProps({
+    selectLeavesOnly: Boolean,
     tags: Array,
     partition: String,
     selected: Array,

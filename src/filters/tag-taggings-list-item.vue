@@ -1,6 +1,6 @@
 <template>
   <v-list-item
-    @click.stop.prevent="emit('select', props.tag)"
+    @click.stop.prevent="select"
     :active="selected.includes(props.tag)"
     color="primary"
   >
@@ -34,11 +34,12 @@
     :selected="props.selected"
     :depth="props.depth + 1"
     @select="tag => emit('select', tag)"
+    :select-leaves-only="props.selectLeavesOnly"
   />
 </template>
 
 <script setup>
-  import { ref } from 'vue'
+  import { ref, watch } from 'vue'
   import TagTaggingsList from './tag-taggings-list.vue'
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
 
@@ -48,6 +49,7 @@
   const props = defineProps({
     tag: String,
     partition: String,
+    selectLeavesOnly: Boolean,
     selected: Array,
     depth: {
       type: Number,
@@ -57,11 +59,25 @@
   const open = ref(false)
   const childTags = ref([])
 
-  Agent
-    .query('taggings-targeting-tags', [props.partition, props.tag])
-    .then(r => childTags.value = r.map(t => t.target))
+  updateChildTags()
 
   Agent.watch(props.tag, ({ state }) => tag.value = state)
+  watch(open, updateChildTags)
+
+  function updateChildTags() {
+    Agent
+      .query('taggings-targeting-tags', [props.partition, props.tag])
+      .then(r => childTags.value = r.map(t => t.target))
+  }
+
+  //  TODO: need to await child tag fetch...
+  function select() {
+    if (props['selectLeavesOnly'] && childTags.value.length > 0) {
+      open.value = true
+      return
+    }
+    emit('select', props.tag)
+  }
 
 </script>
 

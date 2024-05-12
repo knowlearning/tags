@@ -8,6 +8,7 @@
     @dragstart="$event.dataTransfer.setData('text', props.tag)"
     @drop.prevent="e => handleDrop(e, props.tag)"
     @dragover.prevent
+    @click="select"
     filter
   >
       <vueScopeComponent
@@ -39,6 +40,7 @@
             :partition="props.partition"
             :selected="props.selected"
             @select="tag => emit('select', tag)"
+            :select-leaves-only="props.selectLeavesOnly"
           />
         </v-menu>
       </template>
@@ -46,12 +48,12 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue'
+  import { ref, watch } from 'vue'
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import TagTaggingsList from './tag-taggings-list.vue'
 
   const emit = defineEmits(['select'])
-  const props = defineProps(['partition', 'tag', 'selected', 'leaf-selection-only'])
+  const props = defineProps(['partition', 'tag', 'selected', 'selectLeavesOnly'])
   const myTags = ref(null)
   const childTags = ref([])
   const tag = ref({})
@@ -60,13 +62,13 @@
     .state('tags')
     .then(state => myTags.value = state)
 
-  Agent
-    .watch(props.tag, ({ state }) => {
-      tag.value = state
-      updateChildTags()
-    })
+  Agent.watch(props.tag, ({ state }) => tag.value = state)
 
   const open = ref(false)
+
+  watch(open, updateChildTags)
+
+  updateChildTags()
 
   function updateChildTags() {
     Agent
@@ -82,5 +84,14 @@
   function addTag(partition, tag, target) {
     if (!myTags.value[tag]) myTags.value[tag] = {}
     myTags.value[tag][target] = { value: true, partition }
+  }
+
+  //  TODO: need to await child tag fetch...
+  function select() {
+    if (props['selectLeavesOnly'] && childTags.value.length > 0) {
+      open.value = true
+      return
+    }
+    emit('select', props.tag)
   }
 </script>
