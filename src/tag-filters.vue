@@ -9,7 +9,6 @@
         :partition="props.partition"
         :selected="modelValue"
         @click="select(tag)"
-        @dblclick="selectSingleTag(tag)"
         @select="select"
       />
       <v-dialog max-width="500">
@@ -62,6 +61,7 @@
           @click:close="removeTag(tag)"
           draggable
           @dragstart="$event.dataTransfer.setData('text', tag)"
+          @dblclick="selectSingleTag(tag)"
           color="primary"
           closable
         >
