@@ -245,45 +245,58 @@ postgres:
         WHERE root_ancestor = ancestor  -- Ensures this path is the longest starting from its root ancestor
           AND child = $2
         ORDER BY length DESC, path
-    my-descendent-taggings-for-tag: |
-      WITH RECURSIVE TagHierarchy AS (
-        -- Base case: find all taggings where you are the contributor
+    my-descendent-taggings-for-tag:
+      domains:
+      - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
+      - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
+      - create.pilaproject.org
+      - thailand.pilaproject.org
+      - app.pilaproject.org
+      body: |
+        WITH RECURSIVE TagHierarchy AS (
+          -- Base case: find all taggings where you are the contributor
+          SELECT
+              target AS initial_target,
+              target AS descendent_target,
+              taggings.id AS tagging,
+              value,
+              contributor,
+              ARRAY[target] AS path
+          FROM taggings
+          LEFT JOIN metadata ON metadata.id = taggings.id
+          WHERE contributor = $REQUESTER
+            AND partition = $1
+            AND tag = $2
+            AND value IS NOT NULL
+            AND owner = 'tags.knowlearning.systems'
+
+          UNION ALL
+
+          -- Recursive case: find all targets tagged by the current target
+          SELECT
+              th.initial_target,
+              t.target AS descendent_target,
+              t.id AS tagging,
+              t.value AS value,
+              t.contributor,
+              th.path || t.target
+          FROM
+              TagHierarchy th
+          JOIN taggings t ON th.descendent_target = t.contributor
+          JOIN metadata ON metadata.id = t.id
+          WHERE  t.target <> ALL(th.path)  -- Prevent loops by checking if the target is already in the path
+            AND t.partition = $1
+            AND t.tag = $2
+            AND t.value IS NOT NULL
+            AND owner = 'tags.knowlearning.systems'
+        )
         SELECT
-            target AS initial_target,
-            target AS descendent_target,
+            value,
+            tagging,
             contributor,
-            ARRAY[target] AS path
-        FROM taggings
-        LEFT JOIN metadata ON metadata.id = taggings.id
-        WHERE contributor = $REQUESTER
-          AND partition = $1
-          AND tag = $2
-          AND value IS NOT NULL
-          AND owner = 'tags.knowlearning.systems'
-
-        UNION ALL
-
-        -- Recursive case: find all targets tagged by the current target
-        SELECT
-            th.initial_target,
-            t.target AS descendent_target,
-            t.contributor,
-            th.path || t.target
+            descendent_target as target
         FROM
-            TagHierarchy th
-        JOIN taggings t ON th.descendent_target = t.contributor
-        JOIN metadata ON metadata.id = t.id
-        WHERE  t.target <> ALL(th.path)  -- Prevent loops by checking if the target is already in the path
-          AND t.partition = $1
-          AND t.tag = $2
-          AND t.value IS NOT NULL
-          AND owner = 'tags.knowlearning.systems'
-      )
-      SELECT DISTINCT
-          contributor,
-          descendent_target as target
-      FROM
-          TagHierarchy
+            TagHierarchy
 agent: |
   import Agent from 'npm:@knowlearning/agents/deno.js'
   import * as uuid from "https://deno.land/std@0.207.0/uuid/mod.ts";
