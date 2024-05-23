@@ -245,7 +245,7 @@ postgres:
         WHERE root_ancestor = ancestor  -- Ensures this path is the longest starting from its root ancestor
           AND child = $2
         ORDER BY length DESC, path
-    my-descendent-taggings-for-tags: |
+    my-descendent-taggings-for-tag: |
       WITH RECURSIVE TagHierarchy AS (
         -- Base case: find all taggings where you are the contributor
         SELECT
