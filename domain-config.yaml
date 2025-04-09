@@ -305,6 +305,7 @@ agent: |
 
   const PILA_INTERNATIONAL_PARTITION = 'PILA'
   const PILA_THAILAND_PARTITION = 'PILA Thailand'
+  const PUBLIC_TAGS_PARTITION = 'Public Tags'
 
   const ADMIN_TAG = "36e1b060-ed49-11ee-be89-5b04faf266ea"
   const TEACHER_TAG = "49bf66a0-ed49-11ee-be89-5b04faf266ea"
@@ -333,6 +334,7 @@ agent: |
             const reject = () => Agent.log(`User tagging rejected`, partition, user, contributor, tag)
 
             if (partition === contributor) apply()
+            else if (partition === PUBLIC_TAGS_PARTITION && isTrustedDomain(user)) apply()
             else if (isPILAPartition(partition)) {
               if (isSuperAdmin(partition, contributor)) apply()
               else if (tag === PILA_CONTENT_TAG) {
