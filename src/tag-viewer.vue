@@ -40,7 +40,17 @@
   function createTag(name) {
     return Agent.create({
       active_type: 'application/json;type=tag-type',
-      active: { name, description: 'A new tag' }
+      active: {
+        name,
+        description: 'A new tag',
+        translations: {
+          source_language: 'en-us',
+          paths: [
+            [ 'name' ],
+            [ 'description' ]
+          ]
+        }
+      }
     })
   }
 
