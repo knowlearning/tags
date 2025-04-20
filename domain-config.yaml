@@ -301,6 +301,63 @@ agent: |
   import Agent from 'npm:@knowlearning/agents/deno.js'
   import * as uuid from "https://deno.land/std@0.207.0/uuid/mod.ts";
 
+  // TRANSLATION AGENT STUFF
+  // const TRANSLATION_DOMAIN = 'f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:5889'
+  const TRANSLATION_DOMAIN = 'translations.pilaproject.org'
+  const TRANSLATABLE_TARGET_TYPE = 'application/json;type=translatable_target'
+
+  const TranslationAgent = getAgent(TRANSLATION_DOMAIN)
+
+  Agent.on('child', child => {
+    child.on('mutate', async ({ id }) => {
+      if (await isTranslatableItem(id)) {
+        await handleTranslatableItem(id)
+      }
+    })
+  })
+
+  async function handleTranslatableItem(id) {
+    const itemState = await TranslationAgent.state(id)
+    const itemMetadata = await TranslationAgent.metadata(id)
+    itemState.translations.paths.forEach(async path => {
+      const translatableTargetName = `translatable_target/${JSON.stringify([id, ...path])}`
+      const translatableTargetMetadata = await TranslationAgent.metadata(translatableTargetName)
+
+      if (translatableTargetMetadata.active_type !== TRANSLATABLE_TARGET_TYPE) {
+        translatableTargetMetadata.active_type = TRANSLATABLE_TARGET_TYPE
+      }
+
+      const translatableTarget = await TranslationAgent.state(translatableTargetName)
+      const source_string = resolvePath([...path], itemState)
+
+      translatableTarget.source_language = itemState.translations.source_language
+      translatableTarget.source_string = source_string || null
+      translatableTarget.path = [id, ...path]
+      translatableTarget.ii = itemMetadata.ii
+    })
+  }
+
+  function resolvePath(path, value) {
+      while (path.length && value) value = value[path.shift()]
+      return value
+    }
+
+  async function isTranslatableItem(id) {
+    const state = await Agent.state(id)
+    const translations = state.translations
+
+    if (!translations) return false
+    const { source_language, paths } = translations
+    if (!source_language) return false
+    if (!paths) return false
+  
+    const validSourceLang = typeof source_language === 'string' && source_language.length >= 2
+    const validPaths = Array.isArray(paths) && paths.every(p => Array.isArray(p))
+    return validSourceLang && validPaths
+  }
+  // END TRANSLATION AGENT STUFF
+
+
   const TAGGING_TYPE = 'application/json;type=tagging'
 
   const PILA_INTERNATIONAL_PARTITION = 'PILA'
