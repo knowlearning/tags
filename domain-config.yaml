@@ -298,7 +298,7 @@ postgres:
         FROM
             TagHierarchy
 agent: |
-  import Agent from 'npm:@knowlearning/agents/deno.js'
+  import Agent, { getAgent } from 'npm:@knowlearning/agents/deno.js'
   import * as uuid from "https://deno.land/std@0.207.0/uuid/mod.ts";
 
   // TRANSLATION AGENT STUFF
