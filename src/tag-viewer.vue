@@ -54,6 +54,13 @@
     })
   }
 
+  function rehabToMakeTranslatable() {
+    tagType.value.translations = {
+      "source_language": "en-us",
+      "paths": [ [ "name" ], [ "description" ] ]
+    }
+  }
+
 
 </script>
 
@@ -100,6 +107,11 @@
           :disabled="!userIsOwner"
           @click="editing = true"
         >Edit</v-btn>
+        <v-btn
+          v-if="tagType && !tagType.translations"
+          @click="rehabToMakeTranslatable"
+        >Make Old Tag Translatable</v-btn>
+
       </div>
       <h3>ID</h3>
       <p>{{ props.tag }}</p>
