@@ -472,8 +472,7 @@ agent: |
 
   async function hasTag(partition, tag, user) {
     const tagging = await Agent.query('tagging-for-target', [partition, tag, user])
-    Agent.log('CHECKED OUT TAG', partition, tag, user, tagging)
-    return !!tagging[0]
+    return !!tagging?.[0]
   }
 
   async function applyTagging(partition, tag, target, contributor, value) {
