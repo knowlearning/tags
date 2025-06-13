@@ -53,6 +53,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - poland-rct-2025.pilaproject.org
+      - cambodia.pilaproject.org
       - app.pilaproject.org
       body: |
         SELECT *
@@ -65,6 +67,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - poland-rct-2025.pilaproject.org
+      - cambodia.pilaproject.org
       - app.pilaproject.org
       body: |
         SELECT
@@ -81,6 +85,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - poland-rct-2025.pilaproject.org
+      - cambodia.pilaproject.org
       - app.pilaproject.org
       body: |
         SELECT
@@ -98,6 +104,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - poland-rct-2025.pilaproject.org
+      - cambodia.pilaproject.org
       - app.pilaproject.org
       body: |
         SELECT
@@ -175,6 +183,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - poland-rct-2025.pilaproject.org
+      - cambodia.pilaproject.org
       - app.pilaproject.org
       body: |
         SELECT value
@@ -189,6 +199,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - poland-rct-2025.pilaproject.org
+      - cambodia.pilaproject.org
       - app.pilaproject.org
       body: |
         SELECT
@@ -204,6 +216,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - poland-rct-2025.pilaproject.org
+      - cambodia.pilaproject.org
       - app.pilaproject.org
       body: |
         WITH RECURSIVE AncestorPaths AS (
@@ -251,6 +265,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - poland-rct-2025.pilaproject.org
+      - cambodia.pilaproject.org
       - app.pilaproject.org
       body: |
         WITH RECURSIVE TagHierarchy AS (
@@ -362,6 +378,8 @@ agent: |
 
   const PILA_INTERNATIONAL_PARTITION = 'PILA'
   const PILA_THAILAND_PARTITION = 'PILA Thailand'
+  const PILA_CAMBODIA_PARTITION = 'PILA Cambodia'
+  const PILA_POLAND_RCT_PARTITION = 'PILA Poland RCT 2025'
   const PUBLIC_TAGS_PARTITION = 'Public Tags'
 
   const ADMIN_TAG = "36e1b060-ed49-11ee-be89-5b04faf266ea"
@@ -419,6 +437,8 @@ agent: |
     return [
       'app.pilaproject.org',
       'thailand.pilaproject.org',
+      'poland-rct-2025.pilaproject.org',
+      'cambodia.pilaproject.org',
       'create.pilaproject.org',
       'tags.knowlearning.systems',
       'f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898',
@@ -432,20 +452,14 @@ agent: |
   function isPILAPartition(partition) {
     return [
       PILA_INTERNATIONAL_PARTITION,
-      PILA_THAILAND_PARTITION
+      PILA_THAILAND_PARTITION,
+      PILA_POLAND_RCT_PARTITION,
+      PILA_CAMBODIA_PARTITION
     ].includes(partition)
   }
 
   function isSuperAdmin(partition, user) {
-    if (partition === PILA_INTERNATIONAL_PARTITION) {
-      return [
-        "f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f",
-        "c0f3a481-d4d5-4133-a198-94a325aa4536",
-        "0c9c64fc-559e-40d4-916b-852f6d108a17",
-        "aabc6c9c-a4f8-405b-9de3-76588997d52f"  // EDU PILA
-      ].includes(user)
-    }
-    else if (partition === PILA_THAILAND_PARTITION) {
+    if (isPILAPartition(partition)) {
       return [
         "f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f",
         "c0f3a481-d4d5-4133-a198-94a325aa4536",
