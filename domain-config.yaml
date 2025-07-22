@@ -56,6 +56,7 @@ postgres:
       - poland-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - embed.knowlearning.systems
       body: |
         SELECT *
         FROM tag_types
@@ -70,6 +71,7 @@ postgres:
       - poland-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - embed.knowlearning.systems
       body: |
         SELECT
           target
@@ -88,6 +90,7 @@ postgres:
       - poland-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - embed.knowlearning.systems
       body: |
         SELECT
           id AS tagging,
@@ -107,6 +110,7 @@ postgres:
       - poland-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - embed.knowlearning.systems
       body: |
         SELECT
           taggings.id AS tagging,
@@ -186,6 +190,7 @@ postgres:
       - poland-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - embed.knowlearning.systems
       body: |
         SELECT value
         FROM taggings
@@ -202,6 +207,7 @@ postgres:
       - poland-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - embed.knowlearning.systems
       body: |
         SELECT
           tag,
@@ -219,6 +225,7 @@ postgres:
       - poland-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - embed.knowlearning.systems
       body: |
         WITH RECURSIVE AncestorPaths AS (
             -- Anchor member: Initialize with each direct ancestor of the given child
@@ -268,6 +275,7 @@ postgres:
       - poland-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - embed.knowlearning.systems
       body: |
         WITH RECURSIVE TagHierarchy AS (
           -- Base case: find all taggings where you are the contributor
