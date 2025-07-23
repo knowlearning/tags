@@ -33,5 +33,6 @@ const tagSet = [
   'b0926ed0-0d0c-11ef-bdf5-877c72019f04',
   'dacc9090-1c56-11f0-a9d9-670bacd2d69b'
 ]
-await Agent.query('taggings-intersection', [partition, tagSet], 'tags.knowlearning.systems')
+const itemsTagged = await Agent.query('taggings-intersection', [partition, tagSet], 'tags.knowlearning.systems')
+// returns: [{target: '08b37440-0cbf-11ef-9008-15cef562b52e'}]
 ```
