@@ -393,6 +393,7 @@ agent: |
   const ADMIN_TAG = "36e1b060-ed49-11ee-be89-5b04faf266ea"
   const TEACHER_TAG = "49bf66a0-ed49-11ee-be89-5b04faf266ea"
   const TRAINER_TAG = "8ae541e0-ed49-11ee-be89-5b04faf266ea"
+  const THAI_TEACHER_LABEL = "bc66acf0-7249-11f0-a043-df27bf1150f5"
   const PILA_CONTENT_TAG = "1a53db50-e248-11ee-ab5f-07f4a7408770"
   const PILA_COMPETENCY_TAG = "f760dad0-f133-11ee-804e-27f76a81958c"
 
@@ -420,7 +421,7 @@ agent: |
             else if (partition === PUBLIC_TAGS_PARTITION) apply()
             else if (isPILAPartition(partition)) {
               if (isSuperAdmin(partition, contributor)) apply()
-              else if (tag === PILA_CONTENT_TAG) {
+              else if (tag === PILA_CONTENT_TAG || tag === THAI_TEACHER_LABEL) {
                 if (await isAdmin(partition, contributor)) apply()
                 else reject()
               }
