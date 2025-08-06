@@ -127,7 +127,11 @@ postgres:
     taggings-targeting-taggings:
       body: |
         WITH original AS (
-          SELECT id, target, tag, partition FROM taggings WHERE tag = $3 AND partition = $1
+          SELECT id, target, tag, partition
+          FROM taggings
+          WHERE tag = $3
+            AND partition = $1
+            AND value IS NOT NULL
         )
         SELECT
           taggings.id AS tagging,
