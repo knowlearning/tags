@@ -134,10 +134,11 @@ postgres:
             AND value IS NOT NULL
         )
         SELECT
-          taggings.id AS tagging,
+          taggings.id AS id,
           taggings.target,
           taggings.contributor,
           taggings.value,
+          original.id AS target_tagging,
           original.target AS original_target
         FROM taggings
         RIGHT OUTER JOIN original
