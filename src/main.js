@@ -10,7 +10,6 @@ import { aliases, fa } from 'vuetify/iconsets/fa'
 import vuetifyKnowLearningTheme from './vuetify-knowlearning-theme.js'
 
 import Home from './home.vue'
-import TagViewer from './tag-viewer.vue'
 
 //  TODO: trim down imports
 import * as components from 'vuetify/components'
@@ -41,8 +40,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/', component: Home },
-    { path: '/:partition', component: Home, props: true },
-    { path: '/:partition/:tag', component: TagViewer, props: true }
+    { path: '/:partition', component: Home, props: true }
   ]
 })
 

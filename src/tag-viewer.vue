@@ -4,6 +4,7 @@
   import { validate as isUUID } from 'uuid'
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import TagMatches from './tag-matches.vue'
+  import TagOrdering from './tag-ordering.vue'
   import AncestorTree from './tag-ancestor-tree.vue'
   import UserChip from './user-chip.vue'
 
@@ -144,6 +145,12 @@
           addTag(props.partition, props.tag, newTaggingContent)
           newTaggingContent = ''
         }"
+      />
+      <TagOrdering
+        :key="lastAdd"
+        :tag="props.tag"
+        orderTag="1fb696b0-72f1-11f0-b6ec-41e3f89fd425"
+        :partition="props.partition"
       />
     </div>
   </div>

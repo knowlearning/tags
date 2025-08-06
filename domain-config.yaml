@@ -104,6 +104,7 @@ postgres:
     taggings-targeting-tags:
       domains:
       - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
+      - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:5222
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
@@ -123,6 +124,23 @@ postgres:
           AND tag = $2
           AND value IS NOT NULL
           AND metadata.active_type = 'application/json;type=tag-type'
+    taggings-targeting-taggings:
+      body: |
+        WITH original AS (
+          SELECT id, target, tag, partition FROM taggings WHERE tag = $3 AND partition = $1
+        )
+        SELECT
+          taggings.id AS tagging,
+          taggings.target,
+          taggings.contributor,
+          taggings.value,
+          original.target AS original_target
+        FROM taggings
+        RIGHT OUTER JOIN original
+          ON taggings.target = original.id
+          AND taggings.partition = $1
+          AND taggings.tag = $2
+          AND taggings.value IS NOT NULL
     top-level-tags: |
       WITH RECURSIVE roots AS (
           -- Identify root tags that are not targeted by any other tags

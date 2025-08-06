@@ -21,9 +21,6 @@
       />
       <v-toolbar-title>
         <router-link v-if="partition" :to="`/${partition}`">{{ partition }}</router-link>
-        <span v-if="tag">
-          / <vueScopeComponent :id="tag" :path="['name']" />
-        </span>
       </v-toolbar-title>
       <v-spacer />
       <v-btn
@@ -39,7 +36,9 @@
     </v-toolbar>
     <v-container v-if="partition" :key="partition">
       <router-view v-slot="{ Component, route }">
-        <component :is="Component" :key="route.path" />
+        <Suspense>
+          <component :is="Component" :key="route.path" />
+        </Suspense>
       </router-view>
     </v-container>
   </div>
@@ -72,9 +71,6 @@ export default {
   computed: {
     partition() {
       return this.$router.currentRoute.value?.params?.partition
-    },
-    tag() {
-      return this.$router.currentRoute.value?.params?.tag
     }
   }
 }
