@@ -53,7 +53,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
-      - poland-rct-2025.pilaproject.org
+      - polska-rct-2025.pilaproject.org
+      - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
       - embed.knowlearning.systems
@@ -68,7 +69,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
-      - poland-rct-2025.pilaproject.org
+      - polska-rct-2025.pilaproject.org
+      - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
       - embed.knowlearning.systems
@@ -87,7 +89,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
-      - poland-rct-2025.pilaproject.org
+      - polska-rct-2025.pilaproject.org
+      - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
       - embed.knowlearning.systems
@@ -107,7 +110,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
-      - poland-rct-2025.pilaproject.org
+      - polska-rct-2025.pilaproject.org
+      - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
       - embed.knowlearning.systems
@@ -187,7 +191,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
-      - poland-rct-2025.pilaproject.org
+      - polska-rct-2025.pilaproject.org
+      - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
       - embed.knowlearning.systems
@@ -204,7 +209,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
-      - poland-rct-2025.pilaproject.org
+      - polska-rct-2025.pilaproject.org
+      - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
       - embed.knowlearning.systems
@@ -222,7 +228,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
-      - poland-rct-2025.pilaproject.org
+      - polska-rct-2025.pilaproject.org
+      - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
       - embed.knowlearning.systems
@@ -272,7 +279,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
-      - poland-rct-2025.pilaproject.org
+      - polska-rct-2025.pilaproject.org
+      - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
       - embed.knowlearning.systems
@@ -388,6 +396,7 @@ agent: |
   const PILA_THAILAND_PARTITION = 'PILA Thailand'
   const PILA_CAMBODIA_PARTITION = 'PILA Cambodia'
   const PILA_POLAND_RCT_PARTITION = 'PILA Poland RCT 2025'
+  const PILA_FRANCE_RCT_PARTITION = 'PILA France RCT 2025'
   const PUBLIC_TAGS_PARTITION = 'Public Tags'
 
   const ADMIN_TAG = "36e1b060-ed49-11ee-be89-5b04faf266ea"
@@ -446,7 +455,7 @@ agent: |
     return [
       'app.pilaproject.org',
       'thailand.pilaproject.org',
-      'poland-rct-2025.pilaproject.org',
+      'polska-rct-2025.pilaproject.org',
       'cambodia.pilaproject.org',
       'create.pilaproject.org',
       'tags.knowlearning.systems',
@@ -463,6 +472,7 @@ agent: |
       PILA_INTERNATIONAL_PARTITION,
       PILA_THAILAND_PARTITION,
       PILA_POLAND_RCT_PARTITION,
+      PILA_FRANCE_RCT_PARTITION,
       PILA_CAMBODIA_PARTITION
     ].includes(partition)
   }
