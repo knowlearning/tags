@@ -85,13 +85,13 @@
         patch.forEach(async ({ path, value: patchValue={} }) => {
           if (path.length === 2) {
             const [ tag, target ] = path
-            const { partition=user, value=null } = patchValue || {}
+            const { partition=user, context=null, value=null } = patchValue || {}
             let contributor = user
 
             // The only agents able to overwrite contributor are trusted domains
             if (isTrustedDomain(user)) contributor = patchValue.contributor || user
 
-            const apply = () => applyTagging(partition, tag, target, contributor, value)
+            const apply = () => applyTagging(partition, tag, target, contributor, value, context)
             const reject = () => Agent.log(`User tagging rejected`, partition, user, contributor, tag)
 
             if (partition === contributor) apply()
@@ -128,6 +128,7 @@
       'cambodia.pilaproject.org',
       'create.pilaproject.org',
       'tags.knowlearning.systems',
+      'f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9896',
       'f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898',
       'c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:9898',
       '0c9c64fc-559e-40d4-916b-852f6d108a17.localhost:9898',
@@ -177,8 +178,10 @@
     return !!tagging?.[0]
   }
 
-  async function applyTagging(partition, tag, target, contributor, value) {
-    const id = `tagging/${JSON.stringify([partition, tag, target])}`
+  async function applyTagging(partition, tag, target, contributor, value, context) {
+    const taggingPathParts = [partition, tag, target]
+    if (context) taggingPathParts.push(context)
+    const id = `tagging/${JSON.stringify(taggingPathParts)}`
     const tagging = await Agent.state(id)
     const md = await Agent.metadata(id)
 
@@ -190,7 +193,8 @@
       target,
       contributor,
       partition,
-      value
+      value,
+      context
     }
 
     Object.assign(tagging, taggingData)
