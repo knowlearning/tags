@@ -60,11 +60,6 @@
 
   const TAGGING_TYPE = 'application/json;type=tagging'
 
-  const PILA_INTERNATIONAL_PARTITION = 'PILA'
-  const PILA_THAILAND_PARTITION = 'PILA Thailand'
-  const PILA_CAMBODIA_PARTITION = 'PILA Cambodia'
-  const PILA_POLAND_RCT_PARTITION = 'PILA Poland RCT 2025'
-  const PILA_FRANCE_RCT_PARTITION = 'PILA France RCT 2025'
   const PUBLIC_TAGS_PARTITION = 'Public Tags'
 
   const ADMIN_TAG = "36e1b060-ed49-11ee-be89-5b04faf266ea"
@@ -139,11 +134,12 @@
 
   function isPILAPartition(partition) {
     return [
-      PILA_INTERNATIONAL_PARTITION,
-      PILA_THAILAND_PARTITION,
-      PILA_POLAND_RCT_PARTITION,
-      PILA_FRANCE_RCT_PARTITION,
-      PILA_CAMBODIA_PARTITION
+      'PILA',
+      'PILA Thailand',
+      'PILA Thailand Development',
+      'PILA Cambodia',
+      'PILA Poland RCT 2025',
+      'PILA France RCT 2025'
     ].includes(partition)
   }
 
