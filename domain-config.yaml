@@ -54,6 +54,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - dev.gforcesolution.com
+      - pila.gforcesolution.com
       - polska-rct-2025.pilaproject.org
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
@@ -70,6 +72,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - dev.gforcesolution.com
+      - pila.gforcesolution.com
       - polska-rct-2025.pilaproject.org
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
@@ -90,6 +94,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - dev.gforcesolution.com
+      - pila.gforcesolution.com
       - polska-rct-2025.pilaproject.org
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
@@ -125,6 +131,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - dev.gforcesolution.com
+      - pila.gforcesolution.com
       - polska-rct-2025.pilaproject.org
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
@@ -206,6 +214,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - dev.gforcesolution.com
+      - pila.gforcesolution.com
       - polska-rct-2025.pilaproject.org
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
@@ -224,6 +234,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - dev.gforcesolution.com
+      - pila.gforcesolution.com
       - polska-rct-2025.pilaproject.org
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
@@ -243,6 +255,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - dev.gforcesolution.com
+      - pila.gforcesolution.com
       - polska-rct-2025.pilaproject.org
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
@@ -294,6 +308,8 @@ postgres:
       - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
       - create.pilaproject.org
       - thailand.pilaproject.org
+      - dev.gforcesolution.com
+      - pila.gforcesolution.com
       - polska-rct-2025.pilaproject.org
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
@@ -465,6 +481,8 @@ agent: |
     return [
       'app.pilaproject.org',
       'thailand.pilaproject.org',
+      'dev.gforcesolution.com',
+      'pila.gforcesolution.com',
       'polska-rct-2025.pilaproject.org',
       'france-rct-2025.pilaproject.org',
       'cambodia.pilaproject.org',

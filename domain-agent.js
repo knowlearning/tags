@@ -118,6 +118,8 @@
     return [
       'app.pilaproject.org',
       'thailand.pilaproject.org',
+      'dev.gforcesolution.com',
+      'pila.gforcesolution.com',
       'polska-rct-2025.pilaproject.org',
       'france-rct-2025.pilaproject.org',
       'cambodia.pilaproject.org',
