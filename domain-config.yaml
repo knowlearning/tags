@@ -362,7 +362,6 @@ postgres:
             TagHierarchy
 agent: |
   import Agent, { getAgent } from 'npm:@knowlearning/agents/deno.js'
-  import * as uuid from "https://deno.land/std@0.207.0/uuid/mod.ts";
 
   // TRANSLATION AGENT STUFF
   // const TRANSLATION_DOMAIN = 'f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:5889'
@@ -382,7 +381,7 @@ agent: |
   async function handleTranslatableItem(id) {
     const itemState = await TranslationAgent.state(id)
     const itemMetadata = await TranslationAgent.metadata(id)
-    itemState.translations.paths.forEach(async path => {
+    await Promise.all(itemState.translations.paths.map(async path => {
       const translatableTargetName = `translatable_target/${JSON.stringify([id, ...path])}`
       const translatableTargetMetadata = await TranslationAgent.metadata(translatableTargetName)
 
@@ -397,7 +396,7 @@ agent: |
       translatableTarget.source_string = source_string || null
       translatableTarget.path = [id, ...path]
       translatableTarget.ii = itemMetadata.ii
-    })
+    }))
   }
 
   function resolvePath(path, value) {
@@ -440,7 +439,7 @@ agent: |
 
       if (scope === 'tags') {
         Agent.log('GOT TAGGING PATCH', patch)
-        patch.forEach(async ({ path, value: patchValue={} }) => {
+        await Promise.all(patch.map(async ({ path, value: patchValue={} }) => {
           if (path.length === 2) {
             const [ tag, target ] = path
             const { partition=user, context=null, value=null } = patchValue || {}
@@ -456,6 +455,14 @@ agent: |
             else if (partition === PUBLIC_TAGS_PARTITION) apply()
             else if (isPILAPartition(partition)) {
               if (isSuperAdmin(partition, contributor)) apply()
+              //  users' PILA applications can tag users into RCT Buckets (admins may override)
+              else if (
+                isRCTBucketTag(tag)
+                && (
+                  target === contributor
+                  || await isAdmin(partition, contributor)
+                )
+              ) apply()
               else if (tag === PILA_CONTENT_TAG || tag === THAI_TEACHER_LABEL) {
                 if (await isAdmin(partition, contributor)) apply()
                 else reject()
@@ -472,7 +479,7 @@ agent: |
             }
             else reject()
           }
-        })
+        }))
       }
     })
   })
@@ -518,6 +525,14 @@ agent: |
       ].includes(user)
     }
     else return false
+  }
+
+  function isRCTBucketTag(tag) {
+    return [
+      '41ad5640-ab69-11f0-b8c9-a1d0807d9f84', // Control
+      '472a84d0-ab69-11f0-b8c9-a1d0807d9f84', // Treatment
+      'b7589b90-adec-11f0-954c-d1e98d074ab4'  // Opt-Out
+    ].includes(tag)
   }
 
   async function isAdmin(partition, user) {
