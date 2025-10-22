@@ -519,6 +519,7 @@ agent: |
       'PILA Thailand',
       'PILA Thailand Development',
       'PILA Cambodia',
+      'PILA Testing',
       'PILA Poland RCT 2025',
       'PILA France RCT 2025'
     ].includes(partition)
