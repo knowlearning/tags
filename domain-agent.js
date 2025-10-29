@@ -41,8 +41,18 @@
       return value
     }
 
+
+
+
+  const sessions = {}
   async function isTranslatableItem(id) {
+    if (sessions[id]) return false
+
     const state = await Agent.state(id)
+    const { name } = await Agent.metadata(id)
+
+    if (name === 'sessions') sessions[id] = true
+
     const translations = state.translations
 
     if (!translations) return false
@@ -128,6 +138,7 @@
       'dev.gforcesolution.com',
       'pila.gforcesolution.com',
       'polska-rct-2025.pilaproject.org',
+      'testing.pilaproject.org',
       'france-rct-2025.pilaproject.org',
       'cambodia.pilaproject.org',
       'create.pilaproject.org',
@@ -147,6 +158,7 @@
       'PILA Thailand',
       'PILA Thailand Development',
       'PILA Cambodia',
+      'PILA Testing',
       'PILA Poland RCT 2025',
       'PILA France RCT 2025'
     ].includes(partition)
