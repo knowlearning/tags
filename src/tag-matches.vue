@@ -43,6 +43,7 @@
     matches.value = (await query()).map(
       ({ target, value }) => {
         const rowData = {
+          id: target, // default key for rows in v-data-table
           remove: target,
           target,
           contributor: {
@@ -77,6 +78,7 @@
     :items="matches"
     :loading="loading"
     :headers="headers"
+    item-value="id"
   >
     <template v-slot:item.id="data">
       <vueScopeComponent
