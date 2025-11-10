@@ -13,10 +13,7 @@
           style="margin-left: -2px"
         />
       </template>
-      <vueScopeComponent
-        :id="props.id"
-        :path="['name']"
-      />
+      {{ name }}
     </v-chip>
     <v-chip
       v-else-if="
@@ -33,10 +30,7 @@
           style="width: 21px;"
         />
       </template>
-      <vueScopeComponent
-        :id="props.id"
-        :path="['name', 'source_string']"
-      />
+      {{ name }}
     </v-chip>
     <v-chip
       v-else-if="type.startsWith('application/json;type=sequence')"
@@ -50,10 +44,7 @@
           style="width: 21px;"
         />
       </template>
-      <vueScopeComponent
-        :id="props.id"
-        :path="['name']"
-      />
+      {{ name }}
     </v-chip>
     <UserChip
       v-else-if="type.startsWith('application/json;type=user')"
@@ -68,6 +59,7 @@
 
 <script setup>
   import { ref } from 'vue'
+  import { validate as isUUID } from 'uuid'
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import UserChip from './user-chip.vue'
 
@@ -76,6 +68,7 @@
   const type = ref(null)
   const domain = ref(null)
   const typeIconSrc = ref(null)
+  const name = ref(null)
 
   Agent
     .metadata(props.id)
@@ -83,5 +76,18 @@
       type.value = md.active_type
       domain.value = md.domain
       typeIconSrc.value = `${window.location.protocol}//${md.domain}/favicon.svg`
+    })
+
+  Agent
+    .state(props.id)
+    .then((s) => {
+      if (isUUID(s.name)) {
+        Agent
+          .state(s.name)
+          .then(({ source_string }) => {
+            if (source_string) name.value = source_string
+          })
+      }
+      else if (s.name) name.value = s.name
     })
 </script>
