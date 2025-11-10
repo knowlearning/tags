@@ -50,6 +50,21 @@
       v-else-if="type.startsWith('application/json;type=user')"
       :id="props.id"
     />
+    <v-chip
+      v-else-if="name"
+      draggable
+      @dragstart="$event.dataTransfer.setData('text', props.id)"
+    >
+      <template v-slot:prepend>
+        <img
+          :src="typeIconSrc"
+          class="mr-2"
+          style="width: 21px;"
+        />
+      </template>
+      {{ name }}
+    </v-chip>
+
     <span v-else>
       {{ type }}
       {{ props.id }}
@@ -75,7 +90,7 @@
     .then(md => {
       type.value = md.active_type
       domain.value = md.domain
-      typeIconSrc.value = `${window.location.protocol}//${md.domain}/favicon.svg`
+      typeIconSrc.value = `${window.location.protocol}//${md.domain}/favicon.png`
     })
 
   Agent
