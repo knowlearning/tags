@@ -1,5 +1,5 @@
 <template>
-  <span>
+  <span @dblclick="open()">
     <span v-if="type === null">Loading...</span>
     <v-chip
       v-else-if="type === 'application/json;type=tag-type'"
@@ -107,4 +107,10 @@
         if (nameTranslation) name.value = nameTranslation.value
       }
     })
+
+  function open() {
+    if (type.value === 'application/json;type=tag-type') return
+
+    window.open(`https://${domain.value}/${props.id}`, '_blank')
+  }
 </script>
