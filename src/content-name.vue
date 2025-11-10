@@ -80,11 +80,11 @@
 
   const props = defineProps({ id: String })
 
+  const TRANSLATION_DOMAIN = 'translations.pilaproject.org'
   const type = ref(null)
   const domain = ref(null)
   const typeIconSrc = ref(null)
   const name = ref(null)
-
   Agent
     .metadata(props.id)
     .then(md => {
@@ -95,14 +95,16 @@
 
   Agent
     .state(props.id)
-    .then((s) => {
-      if (isUUID(s.name)) {
-        Agent
-          .state(s.name)
-          .then(({ source_string }) => {
-            if (source_string) name.value = source_string
-          })
+    .then(async state => {
+      if (isUUID(state.name)) {
+        const { source_string } = await Agent.state(state.name)
+        if (source_string) name.value = source_string
       }
-      else if (s.name) name.value = s.name
+      else if (state.name) name.value = state.name
+      else {
+        const translations = await Agent.query('translate-item', [props.id, ['en']], TRANSLATION_DOMAIN)
+        const [nameTranslation] = translations.filter(({path}) => path.length === 2 && path[1] === 'name')
+        if (nameTranslation) name.value = nameTranslation.value
+      }
     })
 </script>
