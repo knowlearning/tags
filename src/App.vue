@@ -92,20 +92,29 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { vueScopeComponent } from '@knowlearning/agents/vue.js'
 import PartitionSwitcher from './partition-switcher.vue'
 
-// expose components for template
-// (script-setup auto-registers variables used in template)
 const auth = ref(null)
 
 const targetDialog = ref(false)
 const targetInput = ref('')
-const targetValue = ref('')
 
 const login = () => Agent.login()
 const logout = () => Agent.logout()
+
+const route = useRoute()
+const router = useRouter()
+
+// Bind target to ?target=<value> in the URL query
+const targetValue = computed({
+  get: () => (route.query?.target ? String(route.query.target) : ''),
+  set: val => {
+    const target = (val || '').trim() || undefined
+    router.replace({ query: { target } })
+  }
+})
 
 const openTargetDialog = () => {
   targetDialog.value = true
@@ -120,8 +129,6 @@ const setTarget = () => {
   }
 }
 
-// route-derived state
-const route = useRoute()
 const partition = computed(() => route.params?.partition)
 const tag = computed(() => route.params?.tag)
 
