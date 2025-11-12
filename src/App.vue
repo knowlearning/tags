@@ -1,14 +1,17 @@
 <template>
   <div v-if="!auth?.provider">loading...</div>
-
   <div v-else-if="auth?.provider === 'anonymous'">
-    <v-btn prepend-icon="fa-solid fa-right-to-bracket" @click="login">
+    <v-btn
+      prepend-icon="fa-solid fa-right-to-bracket"
+      @click="login"
+    >
       login
     </v-btn>
   </div>
-
   <div v-else>
-    <v-toolbar color="primary">
+    <v-toolbar
+      color="primary"
+    >
       <PartitionSwitcher
         class="ms-2"
         @select="name => {
@@ -30,10 +33,16 @@
 
       <v-spacer />
 
-      <v-btn @click="logout" append-icon="fa-solid fa-arrow-right-from-bracket">
+      <v-btn
+        @click="logout"
+        append-icon="fa-solid fa-arrow-right-from-bracket"
+      >
         Logout
       </v-btn>
-      <v-avatar class="ms-4 me-4" :image="auth.info.picture" />
+      <v-avatar
+        class="ms-4 me-4"
+        :image="auth.info.picture"
+      />
     </v-toolbar>
 
     <!-- Target mode view -->
@@ -44,7 +53,7 @@
         <v-btn
           color="error"
           class="mt-3"
-          click="targetValue = ''"
+          @click="targetValue = ''"
           prepend-icon="fa-solid fa-xmark"
         >
           Clear Target
@@ -82,7 +91,6 @@
 </template>
 
 <script>
-import { ref } from 'vue'
 import { v4 as uuid } from 'uuid'
 import { vueScopeComponent } from '@knowlearning/agents/vue.js'
 import PartitionSwitcher from './partition-switcher.vue'
@@ -105,12 +113,8 @@ export default {
     this.auth = auth
   },
   methods: {
-    login() {
-      Agent.login()
-    },
-    logout() {
-      Agent.logout()
-    },
+    login() { Agent.login() },
+    logout() { Agent.logout() },
     openTargetDialog() {
       this.targetDialog = true
       this.targetInput = ''
@@ -131,4 +135,5 @@ export default {
     }
   }
 }
+
 </script>
