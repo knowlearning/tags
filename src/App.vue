@@ -90,50 +90,43 @@
   </div>
 </template>
 
-<script>
-import { v4 as uuid } from 'uuid'
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { vueScopeComponent } from '@knowlearning/agents/vue.js'
 import PartitionSwitcher from './partition-switcher.vue'
 
-export default {
-  components: {
-    vueScopeComponent,
-    PartitionSwitcher
-  },
-  data() {
-    return {
-      auth: null,
-      targetDialog: false,
-      targetInput: '', // to hold before applying 
-      targetValue: '' 
-    }
-  },
-  async created() {
-    const { auth } = await Agent.environment()
-    this.auth = auth
-  },
-  methods: {
-    login() { Agent.login() },
-    logout() { Agent.logout() },
-    openTargetDialog() {
-      this.targetDialog = true
-      this.targetInput = ''
-    },
-    setTarget() {
-      if (this.targetInput.trim()) {
-        this.targetValue = this.targetInput.trim()
-        this.targetDialog = false
-      }
-    },
-  },
-  computed: {
-    partition() {
-      return this.$router.currentRoute.value?.params?.partition
-    },
-    tag() {
-      return this.$router.currentRoute.value?.params?.tag
-    }
+// expose components for template
+// (script-setup auto-registers variables used in template)
+const auth = ref(null)
+
+const targetDialog = ref(false)
+const targetInput = ref('')
+const targetValue = ref('')
+
+const login = () => Agent.login()
+const logout = () => Agent.logout()
+
+const openTargetDialog = () => {
+  targetDialog.value = true
+  targetInput.value = ''
+}
+
+const setTarget = () => {
+  const v = targetInput.value.trim()
+  if (v) {
+    targetValue.value = v
+    targetDialog.value = false
   }
 }
 
+// route-derived state
+const route = useRoute()
+const partition = computed(() => route.params?.partition)
+const tag = computed(() => route.params?.tag)
+
+onMounted(async () => {
+  const { auth: a } = await Agent.environment()
+  auth.value = a
+})
 </script>
