@@ -9,6 +9,7 @@
   const router = useRouter()
   const route = useRoute()
   const props = defineProps({ partition: String })
+  const domain = ref(window.location.host)
 
   const availableTags = ref([])
 
@@ -45,6 +46,7 @@
       editable
       :partition="props.partition"
       :roots="availableTags"
+      :domain="domain"
       v-model="selectedTagIds"
     />
     <div v-if="selectedTagIds.length === 1">
