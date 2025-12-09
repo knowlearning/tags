@@ -33,7 +33,7 @@
     >
       <v-img :src="contributorInfo.picture" />
     </v-avatar>
-    {{ contributorInfo.name }}
+    {{ contributorInfo.name || props.id }}
   </v-chip>
   <span v-else> - </span>
 </template>
