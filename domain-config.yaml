@@ -106,11 +106,13 @@ postgres:
       - embed.knowlearning.systems
       body: |
         SELECT
-          id AS tagging,
+          taggings.id AS tagging,
           target,
           contributor,
-          value
+          value,
+          metadata.created AS timestamp
         FROM taggings
+        JOIN metadata ON metadata.id = taggings.id
         WHERE partition = $1
           AND tag = $2
           AND value IS NOT NULL
@@ -154,64 +156,68 @@ postgres:
           AND tag = $2
           AND value IS NOT NULL
           AND metadata.active_type = 'application/json;type=tag-type'
-    top-level-tags: |
-      WITH RECURSIVE roots AS (
-          -- Identify root tags that are not targeted by any other tags
-          SELECT id
-          FROM tag_types
-          WHERE NOT EXISTS (
-              SELECT 1
-              FROM taggings
-              WHERE tag_types.id = target
-                AND taggings.partition = $1
-                AND taggings.target != taggings.tag
-                AND taggings.value IS NOT NULL
-          ) AND EXISTS (
-              SELECT 1
-              FROM taggings
-              WHERE tag_types.id = tag
-                AND taggings.partition = $1
-                AND taggings.value IS NOT NULL
-          )
-      ),
-      traversal AS (
-          -- Begin traversal from root tags to follow tag-target relationships
-          SELECT tag, target, ARRAY[tag] AS path, ARRAY[target] AS reached, false AS is_cycle
-          FROM taggings
-          WHERE tag IN (SELECT id FROM roots)
+    top-level-tags:
+      domains: []
+      body: |
+        WITH RECURSIVE roots AS (
+            -- Identify root tags that are not targeted by any other tags
+            SELECT id
+            FROM tag_types
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM taggings
+                WHERE tag_types.id = target
+                  AND taggings.partition = $1
+                  AND taggings.target != taggings.tag
+                  AND taggings.value IS NOT NULL
+            ) AND EXISTS (
+                SELECT 1
+                FROM taggings
+                WHERE tag_types.id = tag
+                  AND taggings.partition = $1
+                  AND taggings.value IS NOT NULL
+            )
+        ),
+        traversal AS (
+            -- Begin traversal from root tags to follow tag-target relationships
+            SELECT tag, target, ARRAY[tag] AS path, ARRAY[target] AS reached, false AS is_cycle
+            FROM taggings
+            WHERE tag IN (SELECT id FROM roots)
 
-          UNION ALL
+            UNION ALL
 
-          -- Continue traversal, tracking paths and reached tags to detect cycles
-          SELECT t.tag, t.target, tt.path || t.tag, tt.reached || t.target, t.tag = ANY(tt.path) OR tt.is_cycle
-          FROM traversal tt
-          JOIN taggings t ON tt.target = t.tag
-          WHERE NOT tt.is_cycle -- Stop recursion when a cycle is detected to avoid infinite loops
-            AND t.partition = $1
-            AND t.value IS NOT NULL
-      ),
-      isolated_cycles AS (
-          -- Determine isolated cycles not reachable from any root
-          SELECT tag, MIN(tag) OVER (PARTITION BY array_to_string(path, ',')) AS representative
-          FROM traversal
-          WHERE is_cycle
-          AND tag NOT IN (SELECT DISTINCT UNNEST(reached) FROM traversal)
-      )
+            -- Continue traversal, tracking paths and reached tags to detect cycles
+            SELECT t.tag, t.target, tt.path || t.tag, tt.reached || t.target, t.tag = ANY(tt.path) OR tt.is_cycle
+            FROM traversal tt
+            JOIN taggings t ON tt.target = t.tag
+            WHERE NOT tt.is_cycle -- Stop recursion when a cycle is detected to avoid infinite loops
+              AND t.partition = $1
+              AND t.value IS NOT NULL
+        ),
+        isolated_cycles AS (
+            -- Determine isolated cycles not reachable from any root
+            SELECT tag, MIN(tag) OVER (PARTITION BY array_to_string(path, ',')) AS representative
+            FROM traversal
+            WHERE is_cycle
+            AND tag NOT IN (SELECT DISTINCT UNNEST(reached) FROM traversal)
+        )
 
-      -- Select all root tags and unique representatives from isolated cycles
-      SELECT id AS tag
-      FROM roots
+        -- Select all root tags and unique representatives from isolated cycles
+        SELECT id AS tag
+        FROM roots
 
-      UNION
+        UNION
 
-      SELECT DISTINCT representative
-      FROM isolated_cycles
-    tagging-contributor: |
-      SELECT contributor
-      FROM taggings
-      WHERE partition = $1
-        AND tag = $2
-        AND target = $3
+        SELECT DISTINCT representative
+        FROM isolated_cycles
+    tagging-contributor:
+      domains: []
+      body: |
+        SELECT contributor
+        FROM taggings
+        WHERE partition = $1
+          AND tag = $2
+          AND target = $3
     tagging-for-target:
       domains:
       - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898

@@ -3,6 +3,7 @@
   import { vueScopeComponent } from '@knowlearning/agents/vue.js'
   import TagContributor from './tag-contributor.vue'
   import ContentName from './content-name.vue'
+  import { format as datefnsFormat } from 'date-fns';
 
   const props = defineProps({ partition: String, id: String, ids: Array })
   const emit = defineEmits(['untag'])
@@ -19,7 +20,8 @@
     headers.value.unshift({ key: 'remove', title: '' })
     headers.value.push(
       { key: 'contributor', title: 'Contributor' },
-      { key: 'value', title: 'Value' }
+      { key: 'value', title: 'Value' },
+      { key: 'timestamp', title: 'Timestamp' },
     )
   }
 
@@ -41,7 +43,7 @@
     }
 
     matches.value = (await query()).map(
-      ({ target, value }) => {
+      ({ target, value, timestamp }) => {
         const rowData = {
           id: target, // default key for rows in v-data-table
           remove: target,
@@ -51,7 +53,8 @@
             partition: props.partition,
             target
           },
-          value
+          value,
+          timestamp
         }
 
         return rowData
@@ -68,6 +71,11 @@
     tags[props.id][target] = { partition: props.partition, value: null }
     update()
     emit('untag', props.id)
+  }
+
+  function formatDateTime(timestamp) {
+    console.log(timestamp)
+    return datefnsFormat(timestamp, 'MMM d, yyyy H:mm')
   }
 
 </script>
@@ -113,6 +121,9 @@
     </template>
     <template v-slot:item.value="data">
       <pre>{{ data.value }}</pre>
+    </template>
+    <template v-slot:item.timestamp="{ value: timestamp }">
+      <pre>{{ formatDateTime(timestamp) }}</pre>
     </template>
   </v-data-table>
 </template>
