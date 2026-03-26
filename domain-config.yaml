@@ -81,6 +81,7 @@ postgres:
       - cambodia.pilaproject.org
       - app.pilaproject.org
       - embed.knowlearning.systems
+      - export.knowlearning.systems
       body: |
         SELECT
           target
