@@ -61,6 +61,7 @@ postgres:
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - ui-dev.pilaproject.org
       - embed.knowlearning.systems
       body: |
         SELECT *
@@ -82,6 +83,7 @@ postgres:
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - ui-dev.pilaproject.org
       - embed.knowlearning.systems
       - export.knowlearning.systems
       body: |
@@ -106,6 +108,7 @@ postgres:
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - ui-dev.pilaproject.org
       - embed.knowlearning.systems
       body: |
         SELECT
@@ -146,6 +149,7 @@ postgres:
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - ui-dev.pilaproject.org
       - embed.knowlearning.systems
       body: |
         SELECT
@@ -234,6 +238,7 @@ postgres:
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - ui-dev.pilaproject.org
       - embed.knowlearning.systems
       body: |
         SELECT value
@@ -255,6 +260,7 @@ postgres:
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - ui-dev.pilaproject.org
       - embed.knowlearning.systems
       body: |
         SELECT
@@ -277,6 +283,7 @@ postgres:
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - ui-dev.pilaproject.org
       - embed.knowlearning.systems
       body: |
         WITH RECURSIVE AncestorPaths AS (
@@ -331,6 +338,7 @@ postgres:
       - france-rct-2025.pilaproject.org
       - cambodia.pilaproject.org
       - app.pilaproject.org
+      - ui-dev.pilaproject.org
       - embed.knowlearning.systems
       body: |
         WITH RECURSIVE TagHierarchy AS (
@@ -514,6 +522,7 @@ agent: |
   function isTrustedDomain(domain) {
     return [
       'app.pilaproject.org',
+      'ui-dev.pilaproject.org',
       'thailand.pilaproject.org',
       'dev.gforcesolution.com',
       'pila.gforcesolution.com',
