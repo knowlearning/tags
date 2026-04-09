@@ -1,2 +1,0 @@
-{"session_id":"019d7346-003b-73d0-ac0b-c165aa861090","ts":1775755541,"text":"in the domain config .yaml file please add a query called tags-used-in-partition that just shows all tags that have taggings in a partition (dont add any extra domains that have access)"}
-{"session_id":"019d7346-003b-73d0-ac0b-c165aa861090","ts":1775755602,"text":"great, but just use an empty list for the domains"}
