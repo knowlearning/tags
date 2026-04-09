@@ -247,6 +247,14 @@ postgres:
           AND tag = $2
           AND target = $3
           AND value IS NOT NULL
+    tags-used-in-partition:
+      domains: []
+      body: |
+        SELECT DISTINCT tag
+        FROM taggings
+        WHERE partition = $1
+          AND value IS NOT NULL
+        ORDER BY tag
     taggings-for-target:
       domains:
       - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
