@@ -132,24 +132,23 @@
   })
 
   function isTrustedDomain(domain) {
-    return [
-      'app.pilaproject.org',
-      'thailand.pilaproject.org',
-      'dev.gforcesolution.com',
-      'pila.gforcesolution.com',
-      'polska-rct-2025.pilaproject.org',
-      'testing.pilaproject.org',
-      'france-rct-2025.pilaproject.org',
-      'cambodia.pilaproject.org',
-      'create.pilaproject.org',
-      'tags.knowlearning.systems',
-      'f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9896',
-      'f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898',
-      'c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:9898',
-      '0c9c64fc-559e-40d4-916b-852f6d108a17.localhost:9898',
-      'c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061',
-      '0c9c64fc-559e-40d4-916b-852f6d108a17.localhost:6061'
-    ].includes(domain)
+    const normalizedDomain = domain.toLowerCase().replace(/\.$/, '')
+    const hostname = normalizedDomain.split(':')[0]
+
+    return (
+      hostname.endsWith('.pilaproject.org') ||
+      [
+        'dev.gforcesolution.com',
+        'pila.gforcesolution.com',
+        'tags.knowlearning.systems',
+        'f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9896',
+        'f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898',
+        'c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:9898',
+        '0c9c64fc-559e-40d4-916b-852f6d108a17.localhost:9898',
+        'c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061',
+        '0c9c64fc-559e-40d4-916b-852f6d108a17.localhost:6061'
+      ].includes(normalizedDomain)
+    )
   }
 
   function isPILAPartition(partition) {
@@ -160,7 +159,12 @@
       'PILA Cambodia',
       'PILA Testing',
       'PILA Poland RCT 2025',
-      'PILA France RCT 2025'
+      'PILA France RCT 2025',
+      'PILA UI Development',
+      'PILA Germany RCT 2026',
+      'PILA Netherlands RCT 2026',
+      'PILA Latvia RCT 2026',
+      'PILA Slovakia RCT 2026'
     ].includes(partition)
   }
 
