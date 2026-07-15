@@ -56,6 +56,7 @@ postgres:
       - dev.gforcesolution.com
       - pila.gforcesolution.com
       - thaipilacreate.gforcesolution.com
+      - thaipilacreate.eef.or.th
       - '*.knowlearning.systems'
       body: |
         SELECT *
@@ -70,6 +71,7 @@ postgres:
       - dev.gforcesolution.com
       - pila.gforcesolution.com
       - thaipilacreate.gforcesolution.com
+      - thaipilacreate.eef.or.th
       - '*.pilaproject.org'
       - '*.knowlearning.systems'
       body: |
@@ -88,6 +90,7 @@ postgres:
       - dev.gforcesolution.com
       - pila.gforcesolution.com
       - thaipilacreate.gforcesolution.com
+      - thaipilacreate.eef.or.th
       - '*.pilaproject.org'
       - '*.knowlearning.systems'
       body: |
@@ -123,6 +126,7 @@ postgres:
       - dev.gforcesolution.com
       - pila.gforcesolution.com
       - thaipilacreate.gforcesolution.com
+      - thaipilacreate.eef.or.th
       - '*.pilaproject.org'
       - '*.knowlearning.systems'
       body: |
@@ -206,6 +210,7 @@ postgres:
       - dev.gforcesolution.com
       - pila.gforcesolution.com
       - thaipilacreate.gforcesolution.com
+      - thaipilacreate.eef.or.th
       - '*.pilaproject.org'
       - '*.knowlearning.systems'
       body: |
@@ -230,6 +235,7 @@ postgres:
       - dev.gforcesolution.com
       - pila.gforcesolution.com
       - thaipilacreate.gforcesolution.com
+      - thaipilacreate.eef.or.th
       - '*.pilaproject.org'
       - '*.knowlearning.systems'
       body: |
@@ -247,6 +253,7 @@ postgres:
       - dev.gforcesolution.com
       - pila.gforcesolution.com
       - thaipilacreate.gforcesolution.com
+      - thaipilacreate.eef.or.th
       - '*.pilaproject.org'
       - '*.knowlearning.systems'
       body: |
@@ -296,6 +303,7 @@ postgres:
       - dev.gforcesolution.com
       - pila.gforcesolution.com
       - thaipilacreate.gforcesolution.com
+      - thaipilacreate.eef.or.th
       - '*.pilaproject.org'
       - '*.knowlearning.systems'
       body: |
@@ -500,6 +508,7 @@ agent: |
   function isPILAPartition(partition) {
     return [
       'PILA',
+      'PILA Dev',
       'PILA Thailand',
       'PILA Thailand Development',
       'PILA Cambodia',
