@@ -120,6 +120,7 @@
               }
               else if (await hasTag(partition, PILA_COMPETENCY_TAG, tag)) {
                 if (await isAdmin(partition, contributor)) apply()
+                else if (await ownsTarget(contributor, target)) apply()
                 else reject()
               }
               else reject()
@@ -228,4 +229,9 @@
     }
 
     Object.assign(tagging, taggingData)
+  }
+
+  async function ownsTarget(user, target) {
+    const metadata = await Agent.metadata(target)
+    return metadata.owner === user
   }
