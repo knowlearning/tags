@@ -40,8 +40,15 @@ const itemsTagged = await Agent.query('taggings-intersection', [partition, tagSe
 ### Tagging Validity
 
 `valid_start` and `valid_end` are nullable timestamps declared in
-`domain-config.yaml`. NULL means unbounded; finite endpoints are inclusive.
-Existing tagging queries return these fields without changing their filters.
+`domain-config.yaml`. NULL means unbounded.
+
+`taggings-intersection`, `taggings-for-tag`, `taggings-for-tag-in-context`,
+`taggings-targeting-tags`, `targets-for-tag`, `tagging-for-target`,
+`taggings-for-target`, `tag-ancestor-paths`, and
+`my-descendent-taggings-for-tag` only include currently active taggings:
+`valid_start <= NOW()` and `valid_end > NOW()`, allowing NULL bounds.
+Both the initial and recursive steps apply this filter in hierarchy queries.
+`top-level-tags` does not filter by current validity.
 
 ```javascript
 await Agent.query(
@@ -52,8 +59,9 @@ await Agent.query(
 ```
 
 The range query requires boolean `true` and full coverage of the requested
-interval. Equal timestamps check an instant; NULL query bounds require an
-unbounded tagging on that side. Reversed intervals return no rows.
+interval, with inclusive finite endpoints. Equal timestamps check an instant;
+NULL query bounds require an unbounded tagging on that side. Reversed intervals
+return no rows.
 
 Include `valid_start` and `valid_end` alongside `partition`, `value`, and any
 `context` in the existing `tags[tagId][target]` write. Anyone allowed to set the

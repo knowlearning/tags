@@ -101,7 +101,7 @@
   }
 
   function formatInput(value) {
-    return value == null ? '' : datefnsFormat(new Date(value), "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    return value == null ? '' : datefnsFormat(new Date(value), "yyyy-MM-dd'T'HH:mm")
   }
 
 </script>
@@ -185,7 +185,7 @@
             :model-value="formatInput(editingTagging[field])"
             :label="field === 'valid_start' ? 'Valid start' : 'Valid end'"
             type="datetime-local"
-            step="0.001"
+            step="60"
             clearable
             :min="field === 'valid_end' ? formatInput(editingTagging.valid_start) || undefined : undefined"
             :max="field === 'valid_start' ? formatInput(editingTagging.valid_end) || undefined : undefined"

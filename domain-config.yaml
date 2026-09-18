@@ -83,6 +83,8 @@ postgres:
         WHERE partition = $1
           AND tag = ANY($2)
           AND value IS NOT NULL
+          AND (valid_start IS NULL OR valid_start <= NOW())
+          AND (valid_end IS NULL OR valid_end > NOW())
         GROUP BY target, partition
         HAVING COUNT(DISTINCT tag) = ARRAY_LENGTH($2, 1)
     taggings-for-tag:
@@ -110,6 +112,8 @@ postgres:
         WHERE partition = $1
           AND tag = $2
           AND value IS NOT NULL
+          AND (valid_start IS NULL OR valid_start <= NOW())
+          AND (valid_end IS NULL OR valid_end > NOW())
     taggings-for-tag-in-range:
       domains:
       - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
@@ -154,6 +158,8 @@ postgres:
           AND tag = $2
           AND context = $3::text[]
           AND value IS NOT NULL
+          AND (valid_start IS NULL OR valid_start <= NOW())
+          AND (valid_end IS NULL OR valid_end > NOW())
     taggings-targeting-tags:
       domains:
       - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
@@ -178,6 +184,8 @@ postgres:
           AND tag = $2
           AND value IS NOT NULL
           AND metadata.active_type = 'application/json;type=tag-type'
+          AND (valid_start IS NULL OR valid_start <= NOW())
+          AND (valid_end IS NULL OR valid_end > NOW())
     targets-for-tag:
       domains:
         - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
@@ -200,6 +208,8 @@ postgres:
         WHERE partition = $1
           AND tag = $2
           AND value IS NOT NULL
+          AND (valid_start IS NULL OR valid_start <= NOW())
+          AND (valid_end IS NULL OR valid_end > NOW())
     top-level-tags:
       domains: []
       body: |
@@ -279,6 +289,8 @@ postgres:
           AND tag = $2
           AND target = $3
           AND value IS NOT NULL
+          AND (valid_start IS NULL OR valid_start <= NOW())
+          AND (valid_end IS NULL OR valid_end > NOW())
     tags-used-in-partition:
       domains: []
       body: |
@@ -307,6 +319,8 @@ postgres:
         WHERE partition = $1
           AND target = $2
           AND value IS NOT NULL
+          AND (valid_start IS NULL OR valid_start <= NOW())
+          AND (valid_end IS NULL OR valid_end > NOW())
     tag-ancestor-paths:
       domains:
       - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
@@ -328,6 +342,8 @@ postgres:
             WHERE partition = $1
               AND target = $2
               AND value IS NOT NULL
+              AND (valid_start IS NULL OR valid_start <= NOW())
+              AND (valid_end IS NULL OR valid_end > NOW())
 
             UNION ALL
 
@@ -340,6 +356,8 @@ postgres:
             INNER JOIN AncestorPaths ap ON t.target = ap.ancestor
             WHERE partition = $1
               AND value IS NOT NULL
+              AND (t.valid_start IS NULL OR t.valid_start <= NOW())
+              AND (t.valid_end IS NULL OR t.valid_end > NOW())
               AND NOT t.tag = ANY(ap.path)  -- Prevent cycling by not revisiting any ancestors in the path
         ),
         LongestPaths AS (
@@ -385,6 +403,8 @@ postgres:
             AND partition = $1
             AND tag = $2
             AND value IS NOT NULL
+            AND (valid_start IS NULL OR valid_start <= NOW())
+            AND (valid_end IS NULL OR valid_end > NOW())
             AND owner = 'tags.knowlearning.systems'
 
           UNION ALL
@@ -407,6 +427,8 @@ postgres:
             AND t.partition = $1
             AND t.tag = $2
             AND t.value IS NOT NULL
+            AND (t.valid_start IS NULL OR t.valid_start <= NOW())
+            AND (t.valid_end IS NULL OR t.valid_end > NOW())
             AND owner = 'tags.knowlearning.systems'
         )
         SELECT
