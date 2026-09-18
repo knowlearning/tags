@@ -36,3 +36,27 @@ const tagSet = [
 const itemsTagged = await Agent.query('taggings-intersection', [partition, tagSet], 'tags.knowlearning.systems')
 // returns: [{target: '08b37440-0cbf-11ef-9008-15cef562b52e'}]
 ```
+
+### Tagging Validity
+
+`valid_start` and `valid_end` are nullable timestamps declared in
+`domain-config.yaml`. NULL means unbounded; finite endpoints are inclusive.
+Existing tagging queries return these fields without changing their filters.
+
+```javascript
+await Agent.query(
+  'taggings-for-tag-in-range',
+  [partition, tagId, '2026-09-01T00:00:00Z', '2026-09-30T23:59:59Z'],
+  'tags.knowlearning.systems'
+)
+```
+
+The range query requires boolean `true` and full coverage of the requested
+interval. Equal timestamps check an instant; NULL query bounds require an
+unbounded tagging on that side. Reversed intervals return no rows.
+
+Include `valid_start` and `valid_end` alongside `partition`, `value`, and any
+`context` in the existing `tags[tagId][target]` write. Anyone allowed to set the
+tagging can set its range. Omitted dates are preserved; NULL clears them.
+The site uses the dates from its existing tagging query to display local times,
+active dates in green, and expired ends in red.

@@ -20,6 +20,8 @@ postgres:
         contributor: TEXT
         context: TEXT[]
         value: JSON
+        valid_start: TIMESTAMP
+        valid_end: TIMESTAMP
   functions:
     same_domain_authorization:
       returns: BOOLEAN
@@ -99,12 +101,43 @@ postgres:
           target,
           contributor,
           value,
+          context,
+          valid_start,
+          valid_end,
           metadata.created AS timestamp
         FROM taggings
         JOIN metadata ON metadata.id = taggings.id
         WHERE partition = $1
           AND tag = $2
           AND value IS NOT NULL
+    taggings-for-tag-in-range:
+      domains:
+      - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9898
+      - c0f3a481-d4d5-4133-a198-94a325aa4536.localhost:6061
+      - dev.gforcesolution.com
+      - pila.gforcesolution.com
+      - thaipilacreate.gforcesolution.com
+      - thaipilacreate.eef.or.th
+      - '*.pilaproject.org'
+      - '*.knowlearning.systems'
+      body: |
+        SELECT
+          taggings.id AS tagging,
+          target,
+          contributor,
+          context,
+          value,
+          valid_start,
+          valid_end,
+          metadata.created AS timestamp
+        FROM taggings
+        JOIN metadata ON metadata.id = taggings.id
+        WHERE partition = $1
+          AND tag = $2
+          AND value::jsonb = 'true'::jsonb
+          AND (valid_start IS NULL OR ($3::timestamp IS NOT NULL AND valid_start <= $3::timestamp))
+          AND (valid_end IS NULL OR ($4::timestamp IS NOT NULL AND valid_end >= $4::timestamp))
+          AND ($3::timestamp IS NULL OR $4::timestamp IS NULL OR $3::timestamp <= $4::timestamp)
     taggings-for-tag-in-context:
       domains:
       - f74e9cb3-2b53-4c85-9b0c-f1d61b032b3f.localhost:9896
@@ -113,7 +146,9 @@ postgres:
           id AS tagging,
           target,
           contributor,
-          value
+          value,
+          valid_start,
+          valid_end
         FROM taggings
         WHERE partition = $1
           AND tag = $2
@@ -134,7 +169,9 @@ postgres:
           taggings.id AS tagging,
           target,
           contributor,
-          value
+          value,
+          valid_start,
+          valid_end
         FROM taggings
         JOIN metadata ON metadata.id = taggings.target
         WHERE partition = $1
@@ -156,7 +193,9 @@ postgres:
           taggings.id AS tagging,
           target,
           contributor,
-          value
+          value,
+          valid_start,
+          valid_end
         FROM taggings
         WHERE partition = $1
           AND tag = $2
@@ -218,7 +257,7 @@ postgres:
     tagging-contributor:
       domains: []
       body: |
-        SELECT contributor
+        SELECT contributor, valid_start, valid_end
         FROM taggings
         WHERE partition = $1
           AND tag = $2
@@ -234,7 +273,7 @@ postgres:
       - '*.pilaproject.org'
       - '*.knowlearning.systems'
       body: |
-        SELECT value
+        SELECT value, valid_start, valid_end
         FROM taggings
         WHERE partition = $1
           AND tag = $2
@@ -261,7 +300,9 @@ postgres:
       body: |
         SELECT
           tag,
-          value
+          value,
+          valid_start,
+          valid_end
         FROM taggings
         WHERE partition = $1
           AND target = $2
@@ -335,6 +376,8 @@ postgres:
               taggings.id AS tagging,
               value,
               contributor,
+              valid_start,
+              valid_end,
               ARRAY[target] AS path
           FROM taggings
           LEFT JOIN metadata ON metadata.id = taggings.id
@@ -353,6 +396,8 @@ postgres:
               t.id AS tagging,
               t.value AS value,
               t.contributor,
+              t.valid_start,
+              t.valid_end,
               th.path || t.target
           FROM
               TagHierarchy th
@@ -368,6 +413,8 @@ postgres:
             value,
             tagging,
             contributor,
+            valid_start,
+            valid_end,
             descendent_target as target
         FROM
             TagHierarchy
@@ -463,13 +510,13 @@ agent: |
         await Promise.all(patch.map(async ({ path, value: patchValue={} }) => {
           if (path.length === 2) {
             const [ tag, target ] = path
-            const { partition=user, context=null, value=null } = patchValue || {}
+            const { partition=user, context=null, value=null, valid_start, valid_end } = patchValue || {}
             let contributor = user
 
             // The only agents able to overwrite contributor are trusted domains
             if (isTrustedDomain(user)) contributor = patchValue.contributor || user
 
-            const apply = () => applyTagging(partition, tag, target, contributor, value, context)
+            const apply = () => applyTagging(partition, tag, target, contributor, value, context, valid_start, valid_end)
             const reject = () => Agent.log(`User tagging rejected`, partition, user, contributor, tag)
 
             if (partition === contributor) apply()
@@ -584,7 +631,7 @@ agent: |
     return !!tagging?.[0]
   }
 
-  async function applyTagging(partition, tag, target, contributor, value, context) {
+  async function applyTagging(partition, tag, target, contributor, value, context, valid_start, valid_end) {
     const taggingPathParts = [partition, tag, target]
     if (context) taggingPathParts.push(context)
     const id = `tagging/${JSON.stringify(taggingPathParts)}`
@@ -600,7 +647,9 @@ agent: |
       contributor,
       partition,
       value,
-      context
+      context,
+      valid_start: valid_start === undefined ? tagging.valid_start ?? null : valid_start,
+      valid_end: valid_end === undefined ? tagging.valid_end ?? null : valid_end
     }
 
     Object.assign(tagging, taggingData)

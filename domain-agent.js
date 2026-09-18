@@ -89,13 +89,13 @@
         await Promise.all(patch.map(async ({ path, value: patchValue={} }) => {
           if (path.length === 2) {
             const [ tag, target ] = path
-            const { partition=user, context=null, value=null } = patchValue || {}
+            const { partition=user, context=null, value=null, valid_start, valid_end } = patchValue || {}
             let contributor = user
 
             // The only agents able to overwrite contributor are trusted domains
             if (isTrustedDomain(user)) contributor = patchValue.contributor || user
 
-            const apply = () => applyTagging(partition, tag, target, contributor, value, context)
+            const apply = () => applyTagging(partition, tag, target, contributor, value, context, valid_start, valid_end)
             const reject = () => Agent.log(`User tagging rejected`, partition, user, contributor, tag)
 
             if (partition === contributor) apply()
@@ -209,7 +209,7 @@
     return !!tagging?.[0]
   }
 
-  async function applyTagging(partition, tag, target, contributor, value, context) {
+  async function applyTagging(partition, tag, target, contributor, value, context, valid_start, valid_end) {
     const taggingPathParts = [partition, tag, target]
     if (context) taggingPathParts.push(context)
     const id = `tagging/${JSON.stringify(taggingPathParts)}`
@@ -225,7 +225,9 @@
       contributor,
       partition,
       value,
-      context
+      context,
+      valid_start: valid_start === undefined ? tagging.valid_start ?? null : valid_start,
+      valid_end: valid_end === undefined ? tagging.valid_end ?? null : valid_end
     }
 
     Object.assign(tagging, taggingData)
