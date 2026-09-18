@@ -647,12 +647,15 @@ agent: |
       contributor,
       partition,
       value,
-      context,
-      valid_start: valid_start === undefined ? tagging.valid_start ?? null : valid_start,
-      valid_end: valid_end === undefined ? tagging.valid_end ?? null : valid_end
+      context
     }
 
     Object.assign(tagging, taggingData)
+
+    for (const [field, date] of Object.entries({ valid_start, valid_end })) {
+      if (date === null || (date === undefined && tagging[field] === null)) delete tagging[field]
+      else if (date !== undefined) tagging[field] = date
+    }
   }
 
   async function ownsTarget(user, target) {
