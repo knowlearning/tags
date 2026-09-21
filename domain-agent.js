@@ -59,7 +59,7 @@
     const { source_language, paths } = translations
     if (!source_language) return false
     if (!paths) return false
-  
+
     const validSourceLang = typeof source_language === 'string' && source_language.length >= 2
     const validPaths = Array.isArray(paths) && paths.every(p => Array.isArray(p))
     return validSourceLang && validPaths
@@ -166,7 +166,8 @@
       'PILA Germany RCT 2026',
       'PILA Netherlands RCT 2026',
       'PILA Latvia RCT 2026',
-      'PILA Slovakia RCT 2026'
+      'PILA Slovakia RCT 2026',
+      'PILA Exports'
     ].includes(partition)
   }
 
