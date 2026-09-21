@@ -139,8 +139,9 @@ postgres:
         WHERE partition = $1
           AND tag = $2
           AND value::jsonb = 'true'::jsonb
-          AND (valid_start IS NULL OR ($3::timestamp IS NOT NULL AND valid_start <= $3::timestamp))
-          AND (valid_end IS NULL OR ($4::timestamp IS NOT NULL AND valid_end >= $4::timestamp))
+          AND ($4::timestamp IS NULL OR valid_start IS NULL OR valid_start <= $4::timestamp)
+          AND ($3::timestamp IS NULL OR valid_end IS NULL OR valid_end >= $3::timestamp)
+          AND (valid_start IS NULL OR valid_end IS NULL OR valid_start <= valid_end)
           AND ($3::timestamp IS NULL OR $4::timestamp IS NULL OR $3::timestamp <= $4::timestamp)
     taggings-for-tag-in-context:
       domains:

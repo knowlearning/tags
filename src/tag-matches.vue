@@ -35,6 +35,13 @@
       { key: 'timestamp', title: 'Timestamp' },
     )
   }
+  else {
+    headers.value.push(
+      { key: 'tag', title: 'Tag' },
+      { key: 'valid_start', title: 'Valid start' },
+      { key: 'valid_end', title: 'Valid end' },
+    )
+  }
 
   update()
   watch(() => props.ids, () => update())
@@ -48,20 +55,23 @@
 
     if (thisPromise !== lastPromise) return
 
-    const query = () => {
-      if (props.id) return Agent.query('taggings-for-tag', [props.partition, props.id])
-      else return Agent.query('taggings-intersection', [props.partition, props.ids])
-    }
-
-    const rows = await query()
+    const tagIds = props.id ? [props.id] : [...new Set(props.ids || [])]
+    const rowsByTag = await Promise.all(tagIds.map(async tag => {
+      const rows = await Agent.query('taggings-for-tag-in-range', [props.partition, tag, null, null])
+      return rows.map(row => ({ ...row, tag }))
+    }))
     if (thisPromise !== lastPromise) return
+
+    const targetsByTag = rowsByTag.map(rows => new Set(rows.map(row => row.target)))
+    const rows = rowsByTag.flat().filter(row => targetsByTag.every(targets => targets.has(row.target)))
+    if (!props.id) rows.sort((first, second) => first.target.localeCompare(second.target))
 
     matches.value = rows.map(row => ({
       ...row,
       id: row.tagging || row.target,
       remove: row.target,
       contributor: {
-        tag: props.id,
+        tag: row.tag,
         partition: props.partition,
         target: row.target
       }
@@ -88,13 +98,20 @@
     if (
       field === 'valid_end'
       && item.valid_end != null
-      && new Date(item.valid_end).getTime() < now.value
+      && new Date(item.valid_end).getTime() <= now.value
     ) return 'text-error'
 
     if (
       item.value === true
+      && item.valid_start != null
+      && new Date(item.valid_start).getTime() > now.value
+      && (item.valid_end == null || new Date(item.valid_end).getTime() >= new Date(item.valid_start).getTime())
+    ) return 'text-purple'
+
+    if (
+      item.value === true
       && (item.valid_start == null || new Date(item.valid_start).getTime() <= now.value)
-      && (item.valid_end == null || new Date(item.valid_end).getTime() >= now.value)
+      && (item.valid_end == null || new Date(item.valid_end).getTime() > now.value)
     ) return 'text-success'
 
     return ''
@@ -145,6 +162,9 @@
     <template v-slot:item.target="{ value:target }">
       <ContentName :id="target" />
     </template>
+    <template v-slot:item.tag="{ value: tag }">
+      <vueScopeComponent :id="tag" :path="['name']" />
+    </template>
     <template v-slot:item.value="data">
       <pre>{{ data.value }}</pre>
     </template>
@@ -157,6 +177,7 @@
       v-slot:[`item.${field}`]="{ item, value }"
     >
       <v-btn
+        v-if="props.id"
         variant="text"
         size="small"
         class="text-none"
@@ -166,6 +187,9 @@
       >
         {{ value == null ? (field === 'valid_start' ? 'No start' : 'No end') : formatDateTime(value) }}
       </v-btn>
+      <span v-else class="text-no-wrap" :class="validityColor(item, field)">
+        {{ value == null ? (field === 'valid_start' ? 'No start' : 'No end') : formatDateTime(value) }}
+      </span>
     </template>
   </v-data-table>
 

@@ -58,13 +58,26 @@ await Agent.query(
 )
 ```
 
-The range query requires boolean `true` and full coverage of the requested
-interval, with inclusive finite endpoints. Equal timestamps check an instant;
-NULL query bounds require an unbounded tagging on that side. Reversed intervals
+The range query requires boolean `true` and overlap with the requested interval,
+with inclusive finite endpoints. Equal timestamps check an instant; NULL query
+bounds impose no restriction on that side. Reversed requested or stored intervals
 return no rows.
+
+```javascript
+await Agent.query(
+  'taggings-for-tag-in-range',
+  [partition, tagId, null, null],
+  'tags.knowlearning.systems'
+)
+```
+
+With both query bounds NULL, the range query returns all valid ranges, including
+past and future taggings. The admin interface uses this query for each selected
+tag and intersects the returned targets. Selected tags do not need to be active
+at the same time for a target to appear.
 
 Include `valid_start` and `valid_end` alongside `partition`, `value`, and any
 `context` in the existing `tags[tagId][target]` write. Anyone allowed to set the
 tagging can set its range. Omitted dates are preserved; NULL clears them.
-The site uses the dates from its existing tagging query to display local times,
+The site displays local times, future tagging start and end bounds in purple,
 active dates in green, and expired ends in red.

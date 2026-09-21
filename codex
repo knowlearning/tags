@@ -3,7 +3,7 @@ set -eu
 
 CODEX_VERSION="${CODEX_VERSION:-0.154.0}"
 IMAGE="${IMAGE:-codex:local}"
-NAME="${NAME:-codex}"
+NAME="${NAME:-codex_tags}"
 REPO_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 WORKDIR="${WORKDIR:-/workspace}"
 ALLOW_NET="${ALLOW_NET:-1}"
